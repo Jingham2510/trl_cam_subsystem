@@ -6,5 +6,6 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0.102"
 chrono = "0.4.44"
+nalgebra = "0.35.0"
 rusb = "0.9.4"
 rustgeomapping = "0.1.0"

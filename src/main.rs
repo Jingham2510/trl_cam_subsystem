@@ -130,7 +130,6 @@ fn command_handler(mut config_manager : ConfigManager){
                     Ok(mut sys_cntrller) =>{
                         println!(">Controller started");
 
-                        println!("{:?}", sys_cntrller.fire_all_cams());
 
                     }
                     Err(e) =>{
