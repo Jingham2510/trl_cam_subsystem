@@ -36,7 +36,6 @@ const HMAP_FP : &str = "/home/trl/Desktop/global";
 
 //Heightmap size controllers - hmap size based on a resolution of 0.0015m over a space of 1.5m?
 const HMAP_RES : f32 = 0.0015;
-
 const GLOBAL_AREA_WIDTH : f32 = 1.5;
 const GLOBAL_AREA_HEIGHT : f32 = 1.5;
 
@@ -51,25 +50,25 @@ const GLOBAL_HMAP_HEIGHT : usize = (GLOBAL_AREA_HEIGHT / HMAP_RES) as usize;
 //The transformation from the cameras to the tcp - need to be sorted
 const CAM_A_TRANSFORM : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
                                                 0.0, 1.0, 0.0, 0.0;
-                                                0.0, 0.0, 1.0, 1.0;
+                                                0.0, 0.0, 1.0, 0.0;
                                                 0.0, 0.0, 0.0, 1.0];
 
 const CAM_BL_TRANSFORM : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
                                                 0.0, 1.0, 0.0, 0.0;
-                                                0.0, 0.0, 1.0, 1.0;
+                                                0.0, 0.0, 1.0, 0.0;
                                                 0.0, 0.0, 0.0, 1.0];
 
 const CAM_BR_TRANSFORM : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
                                                 0.0, 1.0, 0.0, 0.0;
-                                                0.0, 0.0, 1.0, 1.0;
+                                                0.0, 0.0, 1.0, 0.0;
                                                 0.0, 0.0, 0.0, 1.0];
 
 const TCP_TRANSFORM_LIST : [Matrix4<f32>; 3] = [CAM_A_TRANSFORM, CAM_BL_TRANSFORM, CAM_BR_TRANSFORM];
 
 //Default croppings for each camera
-const CAM_A_CROP : [f32;6] = [-1.0, 1.0, -1.0, 1.0, -1.0, 1.0];
-const CAM_BL_CROP : [f32;6] = [-1.0, 1.0, -1.0, 1.0, -1.0, 1.0];
-const CAM_BR_CROP : [f32;6] = [-1.0, 1.0, -1.0, 1.0, -1.0, 1.0];
+const CAM_A_CROP : [f32;6] = [-0.5, 0.5, -0.5, 0.5, 0.0, 1.0];
+const CAM_BL_CROP : [f32;6] = [-0.5, 0.5, -0.5, 0.5, 0.0, 1.0];
+const CAM_BR_CROP : [f32;6] = [-0.5, 0.5, -0.5, 0.5, 0.0, 1.0];
 
 const CROP_LIST : [[f32;6];3] = [CAM_A_CROP, CAM_BL_CROP, CAM_BR_CROP];
 
@@ -106,9 +105,13 @@ impl SystemController{
             }
         }
 
+        let mut global_hmap = Heightmap::new(GLOBAL_HMAP_WIDTH, GLOBAL_HMAP_HEIGHT);
+        global_hmap.set_lower_coord_bounds([0.0, 0.0]);
+        global_hmap.set_upper_coord_bounds([1.5, 1.5]);
+
         Ok(SystemController{
             cameras : connected_cams,
-            global_hmap : Heightmap::new(GLOBAL_HMAP_WIDTH, GLOBAL_HMAP_HEIGHT),
+            global_hmap,
             curr_pos : [0.0, 0.0, 0.0],
             curr_ori : [0.0, 0.0, 0.0, 0.0]
         })
@@ -125,7 +128,7 @@ impl SystemController{
             
             pcl_vec.push(cam.take_pcl()?);
         }
-        println!(">Cams fired");
+     
         Ok(pcl_vec)
     }
 
@@ -145,7 +148,7 @@ impl SystemController{
         //Calculate the workspace transform
         let work_tmat = matrix![1.0, 0.0, 0.0, self.curr_pos[0];
                                                                     0.0, 1.0, 0.0, self.curr_pos[1];
-                                                                    0.0, 0.0, 0.0, self.curr_pos[2];
+                                                                    0.0, 0.0, 1.0, self.curr_pos[2];
                                                                     0.0, 0.0, 0.0, 1.0];
 
         for (i ,pcl) in pcl_list.iter_mut().enumerate(){          
@@ -202,14 +205,20 @@ impl SystemController{
 
                             //Go through each point cloud and transform it to the work space
                             self.workspace_transform(&mut pcl_list);    
+                            pcl_list[0].save_to_file("/home/trl/Desktop/local_pcl");
                             println!(">TRANSFORM_TIME: {:?}", now.elapsed()?.as_millis());        
 
                             //Group the pointclouds and turn them into a heightmap - resolution based on desired resolution
                             let local_hmap = Heightmap::create_from_pcl_list_with_res(pcl_list, HMAP_RES)?;
+                            local_hmap.save_to_file("/home/trl/Desktop/local");
+
                             println!(">HEIGHTMAP_CREATION_TIME: {:?}", now.elapsed()?.as_millis());
+                            println!("ROWS:{}, COL:{}", local_hmap.height(), local_hmap.width());
 
                             
                             //Slot the heightmap into the global heightmap
+                            self.global_hmap.update_section(local_hmap);
+                            println!(">SLOTTING_TIME: {:?}", now.elapsed()?.as_millis());       
 
                             //Update the current heightmap file
                             self.global_hmap.save_to_file(HMAP_FP)?;

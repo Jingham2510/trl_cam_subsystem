@@ -9,7 +9,7 @@ chrono = "0.4.44"
 #This has to match the nalgebra version in rustgeomapping - otherwise throws type errors
 nalgebra = "0.34.2"
 rusb = "0.9.4"
-rustgeomapping = "0.1.0"
+rustgeomapping = {version = "0.1.0", features = ["sense"]}
 tokio = {version = "1.52.3", features = ["sync"]}
 
 
