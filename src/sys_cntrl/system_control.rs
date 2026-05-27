@@ -7,6 +7,15 @@ use rustgeomapping::data_types::pointcloud::PointCloud;
 use crate::config::config_manager::ConfigManager;
 use anyhow::bail;
 use nalgebra::{Matrix4, matrix};
+use std::io::stdin;
+
+use std::time::{SystemTime};
+
+
+use std::ops::Mul;
+use std::{thread};
+
+use tokio::sync::watch;
 
 pub struct SystemController{
     ///The camera objects that are plugged in 
@@ -15,20 +24,28 @@ pub struct SystemController{
     global_hmap : Heightmap,
 
     //Current position (tcp mm from the base of the robot)
-    curr_pos : [f64; 3],
+    curr_pos : [f32; 3],
     //Current orientation (tcp quartenion from the base of the robot)
-    curr_ori : [f64; 4]
+    curr_ori : [f32; 4]
 }
 
 
-//Heightmap size controllers
-const GLOBAL_HMAP_WIDTH : usize = 1000;
-const GLOBAL_HMAP_HEIGHT : usize = 1000;
+//Filepath for height map saving
+const HMAP_FP : &str = "/home/trl/Desktop/global";
 
 
-//The local heightmap - although it maybe should be calculated based on the bounds?
-const LOCAL_HMAP_WIDTH : usize = 75;
-const LOCAL_HMAP_HEIGHT : usize = 75;
+//Heightmap size controllers - hmap size based on a resolution of 0.0015m over a space of 1.5m?
+const HMAP_RES : f32 = 0.0015;
+
+const GLOBAL_AREA_WIDTH : f32 = 1.5;
+const GLOBAL_AREA_HEIGHT : f32 = 1.5;
+
+
+const GLOBAL_HMAP_WIDTH : usize = (GLOBAL_AREA_WIDTH / HMAP_RES) as usize;
+const GLOBAL_HMAP_HEIGHT : usize = (GLOBAL_AREA_HEIGHT / HMAP_RES) as usize;
+
+
+
 
 
 //The transformation from the cameras to the tcp - need to be sorted
@@ -47,7 +64,7 @@ const CAM_BR_TRANSFORM : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
                                                 0.0, 0.0, 1.0, 1.0;
                                                 0.0, 0.0, 0.0, 1.0];
 
-const TRANSFORM_LIST : [Matrix4<f32>; 3] = [CAM_A_TRANSFORM, CAM_BL_TRANSFORM, CAM_BR_TRANSFORM];
+const TCP_TRANSFORM_LIST : [Matrix4<f32>; 3] = [CAM_A_TRANSFORM, CAM_BL_TRANSFORM, CAM_BR_TRANSFORM];
 
 //Default croppings for each camera
 const CAM_A_CROP : [f32;6] = [-1.0, 1.0, -1.0, 1.0, -1.0, 1.0];
@@ -65,6 +82,7 @@ impl SystemController{
         
 
         println!(">Starting system control - no longer accepting typed user input");
+        println!(">GLOBAL WIDTH:{} GLOBAL HEIGHT:{}", GLOBAL_HMAP_WIDTH, GLOBAL_HMAP_WIDTH);
 
         //Update the config - not required by the system as it won't be updated while the system is alive
         config.update();
@@ -82,7 +100,6 @@ impl SystemController{
         let mut realsense_cnt = 0;
 
         for cam in cam_list{
-            println!("{cam}");
             if cam == "Realsense"{
                 connected_cams.push(CamType::RealsenseCam(DepthCam::connect_realsense(realsense_cnt)?));
                 realsense_cnt += 1;
@@ -108,6 +125,7 @@ impl SystemController{
             
             pcl_vec.push(cam.take_pcl()?);
         }
+        println!(">Cams fired");
         Ok(pcl_vec)
     }
 
@@ -121,50 +139,130 @@ impl SystemController{
 
     }
 
-    ///Performs the default crop on a list of pointclouds
-    fn standard_transform(&self, pcl_list : &mut Vec<PointCloud>){
+    ///Performs the combined default-workplace transform on a set of pointclouds
+    fn workspace_transform(&self, pcl_list : &mut Vec<PointCloud>){
 
-        for (i ,pcl) in pcl_list.iter_mut().enumerate(){
+        //Calculate the workspace transform
+        let work_tmat = matrix![1.0, 0.0, 0.0, self.curr_pos[0];
+                                                                    0.0, 1.0, 0.0, self.curr_pos[1];
+                                                                    0.0, 0.0, 0.0, self.curr_pos[2];
+                                                                    0.0, 0.0, 0.0, 1.0];
+
+        for (i ,pcl) in pcl_list.iter_mut().enumerate(){          
+            //Combine the standard transform and the position based transform            
+            let tmat = TCP_TRANSFORM_LIST[i].mul(work_tmat);
             
-            
-            pcl.transform_with(&TRANSFORM_LIST[i]);
+            pcl.transform_with(&tmat);
         }
-
     }
 
 
     ///Runs the autonomous mapping control loop
     pub fn auto_map_start(&mut self) -> Result<(), anyhow::Error>{
-        println!(">automapping start - Warning - do not type");
+        println!(">automapping start - WARNING - DO NOT TYPE");
 
         //Alert the main system to the filepath of the heightmap file
+        println!(">FP:{}", HMAP_FP);
+
+        //Spawn a std in reciever
+        let mut stdin_channel = Self::spawn_auto_stdin_channel();
+
+        
 
         //Do until main system instructs to stop
-        loop{
+        loop{           
             
             //Poll stdin to see if the main system has updated current position/orientation
+            if stdin_channel.has_changed()?{
+                let inp = stdin_channel.borrow_and_update().to_lowercase();
+                let inp = inp.trim();
+                match inp{
+                    //Close the connection
+                    "quit" | "close" => {
+                        println!(">Closing auto system");
+                        break;
+                    }
+                    //Assume other messages are position/orientation instructions
+                    _ => {if !self.parse_pos_ori(inp).is_ok(){
+                        println!(">Invalid pos/ori string")
+                        }else{
+                            //Only fire all cameras if the main system has sent a pos string - stops the and doesnt risk file being read while incomplete
 
-            //Fire all cameras
-            let mut pcl_list = self.fire_all_cams()?;
+                            println!(">FIRING");
+                            let now = SystemTime::now();
+    
+                            //Fire all cameras
+                            let mut pcl_list = self.fire_all_cams()?;
 
-            //Crop the point cloud
-            self.standard_crop(&mut pcl_list);
+                            println!(">FIRING_TIME: {:?}", now.elapsed()?.as_millis());
 
-            //Go through each point cloud and transform it to the correct space
-            self.standard_transform(&mut pcl_list);            
+                            //Crop the point cloud
+                            self.standard_crop(&mut pcl_list);
+                            println!(">CROPPING_TIME: {:?}", now.elapsed()?.as_millis());
 
-            //Group the pointclouds and turn them into a heightmap
-            let local_hmap = Heightmap::create_from_pcl_list(pcl_list, LOCAL_HMAP_WIDTH, LOCAL_HMAP_HEIGHT)?;
+                            //Go through each point cloud and transform it to the work space
+                            self.workspace_transform(&mut pcl_list);    
+                            println!(">TRANSFORM_TIME: {:?}", now.elapsed()?.as_millis());        
 
-            //Slot the heightmap into the global heightmap
+                            //Group the pointclouds and turn them into a heightmap - resolution based on desired resolution
+                            let local_hmap = Heightmap::create_from_pcl_list_with_res(pcl_list, HMAP_RES)?;
+                            println!(">HEIGHTMAP_CREATION_TIME: {:?}", now.elapsed()?.as_millis());
 
-            //Update the current heightmap file
+                            
+                            //Slot the heightmap into the global heightmap
 
+                            //Update the current heightmap file
+                            self.global_hmap.save_to_file(HMAP_FP)?;
+                            println!(">SAVING_TIME: {:?}", now.elapsed()?.as_millis());
+
+                            println!(">READ");
+
+                        };  
+                    }                    
+                    
+                }
+            }            
 
         }
 
 
         Ok(())
     }
+
+
+    ///Spawns a blocking stdin thread (blocks a different thread)
+    fn spawn_auto_stdin_channel() -> watch::Receiver<String> {
+        let (tx, rx) = watch::channel(String::new());
+        thread::spawn(move || loop {
+            let mut buffer = String::new();
+            stdin().read_line(&mut buffer).unwrap();
+            tx.send(buffer).unwrap();
+        });
+    rx
+    }
+
+    ///Parse a position/ori message through std in
+    /// To minimis computation it is formated minimally and minimal error checking is done
+    /// x,y,z,qw,qx,qy,qz
+    /// 1.0,2.0,3.0,4.0,5.0,6.0,7.0
+    fn parse_pos_ori(&mut self, pos_ori_str : &str) -> Result<(), anyhow::Error>{
+
+
+        let tokens : Vec<&str> = pos_ori_str.split(",").collect();
+
+        if tokens.len() != 7{
+            bail!("Invalid pos/ori string")
+        }
+
+        self.curr_pos = [tokens[0].parse()?, tokens[1].parse()?, tokens[2].parse()?];
+        self.curr_ori = [tokens[3].parse()?, tokens[4].parse()?, tokens[5].parse()?, tokens[6].parse()?];
+
+    
+
+
+        Ok(())
+    }
+
+  
 
 }

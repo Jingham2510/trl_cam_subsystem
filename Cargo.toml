@@ -6,6 +6,19 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0.102"
 chrono = "0.4.44"
-nalgebra = "0.35.0"
+#This has to match the nalgebra version in rustgeomapping - otherwise throws type errors
+nalgebra = "0.34.2"
 rusb = "0.9.4"
 rustgeomapping = "0.1.0"
+tokio = {version = "1.52.3", features = ["sync"]}
+
+
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+
+[profile.debugging]
+inherits = "dev"
+debug = true

@@ -4,6 +4,7 @@ use std::io::stdin;
 use std::time::SystemTime;
 use chrono::DateTime;
 use chrono::offset::Local;
+use std::env;
 
 mod config;
 mod sys_cntrl;
@@ -15,6 +16,7 @@ use crate::sys_cntrl::system_control::SystemController;
 
 ///Entry point - presents the homepage
 fn main() {
+
 
     println!(">Starting config manager");
     let config_manager = ConfigManager::start_manager();
@@ -53,6 +55,32 @@ fn main() {
 
 ///Handles all input and command from the user
 fn command_handler(mut config_manager : ConfigManager){
+
+    //Get the cmd line arguments
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() > 1{
+        //If the first argument is "auto" - assume main system control
+        if args[1] == "auto"{
+            match SystemController::start_system_control(&mut config_manager){
+
+                Ok(mut sys_cntrller) =>{
+                    println!(">Controller started");
+                    
+                    let _ = sys_cntrller.auto_map_start();
+
+                }
+                Err(e) =>{
+                    println!("{e}");
+                    println!(">Exiting system control")
+                }
+            }
+            return           
+        }
+    }
+
+
+    //If any of the arguments read "auto" instantly go into system auto mode
 
     //List of valid commands - that the user is told about
     const CMD_LIST : [&str; 5] = ["help  - lists valid commands", "quit - closes the program", "time - displays systems date and time", "lsusb - show connected usb RGBD cameras", "start system - Start the system controller (removes user input)"];
@@ -129,6 +157,10 @@ fn command_handler(mut config_manager : ConfigManager){
 
                     Ok(mut sys_cntrller) =>{
                         println!(">Controller started");
+
+
+                        println!("{:?}", sys_cntrller.auto_map_start());
+
 
 
                     }
