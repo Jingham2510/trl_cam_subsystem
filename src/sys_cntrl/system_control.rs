@@ -11,7 +11,6 @@ use std::io::stdin;
 
 use std::time::{SystemTime};
 
-
 use std::ops::Mul;
 use std::{thread};
 
@@ -66,7 +65,7 @@ const CAM_BR_TRANSFORM : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
 const TCP_TRANSFORM_LIST : [Matrix4<f32>; 3] = [CAM_A_TRANSFORM, CAM_BL_TRANSFORM, CAM_BR_TRANSFORM];
 
 //Default croppings for each camera
-const CAM_A_CROP : [f32;6] = [-0.5, 0.5, -0.5, 0.5, 0.0, 1.0];
+const CAM_A_CROP : [f32;6] = [-0.15, 0.4, 0.05, 0.13, 0.3, 1.0];
 const CAM_BL_CROP : [f32;6] = [-0.5, 0.5, -0.5, 0.5, 0.0, 1.0];
 const CAM_BR_CROP : [f32;6] = [-0.5, 0.5, -0.5, 0.5, 0.0, 1.0];
 
@@ -192,20 +191,22 @@ impl SystemController{
                             //Only fire all cameras if the main system has sent a pos string - stops the and doesnt risk file being read while incomplete
 
                             println!(">FIRING");
-                            let now = SystemTime::now();
+                            
     
                             //Fire all cameras
                             let mut pcl_list = self.fire_all_cams()?;
 
-                            println!(">FIRING_TIME: {:?}", now.elapsed()?.as_millis());
-
                             //Crop the point cloud
                             self.standard_crop(&mut pcl_list);
-                            println!(">CROPPING_TIME: {:?}", now.elapsed()?.as_millis());
 
+                           // let temp_hmap = Heightmap::create_from_pcl_list_with_res(pcl_list, HMAP_RES)?;
+                           // temp_hmap.save_to_file("/home/trl/Desktop/untransformed_local");
+
+                            let now = SystemTime::now();
                             //Go through each point cloud and transform it to the work space
                             self.workspace_transform(&mut pcl_list);    
                             pcl_list[0].save_to_file("/home/trl/Desktop/local_pcl");
+                            println!("bnds: {:?}", pcl_list[0].bounds());
                             println!(">TRANSFORM_TIME: {:?}", now.elapsed()?.as_millis());        
 
                             //Group the pointclouds and turn them into a heightmap - resolution based on desired resolution
@@ -217,7 +218,7 @@ impl SystemController{
 
                             
                             //Slot the heightmap into the global heightmap
-                            self.global_hmap.update_section(local_hmap);
+                            println!("{:?}", self.global_hmap.update_section(local_hmap));
                             println!(">SLOTTING_TIME: {:?}", now.elapsed()?.as_millis());       
 
                             //Update the current heightmap file
