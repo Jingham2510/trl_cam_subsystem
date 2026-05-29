@@ -144,10 +144,19 @@ impl SystemController{
     ///Performs the combined default-workplace transform on a set of pointclouds
     fn workspace_transform(&self, pcl_list : &mut Vec<PointCloud>){
 
+
+        let [q_0, q_1, q_2, q_3] = self.curr_ori;   
+
+        let q_0_sq = q_0.powi(2);
+        let q_1_sq = q_1.powi(2);
+        let q_2_sq = q_2.powi(2);
+        let q_3_sq = q_3.powi(2);
+
+
         //Calculate the workspace transform
-        let work_tmat = matrix![1.0, 0.0, 0.0, self.curr_pos[0];
-                                                                    0.0, 1.0, 0.0, self.curr_pos[1];
-                                                                    0.0, 0.0, 1.0, self.curr_pos[2];
+        let work_tmat = matrix![2.0*(q_0_sq + q_1_sq) - 1.0, 2.0*(q_1*q_2-q_0*q_3), 2.0*(q_1*q_3+q_0*q_2), self.curr_pos[0];
+                                                                    2.0*(q_1*q_2 + q_0*q_3), 2.0*(q_0_sq*q_2_sq) - 1.0, 2.0*(q_1*q_3 - q_0*q_1), self.curr_pos[1];
+                                                                    2.0*(q_1*q_3 - q_0*q_2), 2.0*(q_2*q_3 + q_0*q_1), 2.0*(q_0_sq + q_3_sq) - 1.0, self.curr_pos[2];
                                                                     0.0, 0.0, 0.0, 1.0];
 
         for (i ,pcl) in pcl_list.iter_mut().enumerate(){          
