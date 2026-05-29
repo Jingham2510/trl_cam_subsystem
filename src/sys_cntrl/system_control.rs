@@ -145,20 +145,23 @@ impl SystemController{
     fn workspace_transform(&self, pcl_list : &mut Vec<PointCloud>){
 
 
-        let [q_0, q_1, q_2, q_3] = self.curr_ori;   
+        let [q_w, q_i, q_j, q_k] = self.curr_ori;   
 
-        let q_0_sq = q_0.powi(2);
-        let q_1_sq = q_1.powi(2);
-        let q_2_sq = q_2.powi(2);
-        let q_3_sq = q_3.powi(2);
+        
+        let q_i_sq = q_i.powi(2);
+        let q_j_sq = q_j.powi(2);
+        let q_k_sq = q_k.powi(2);
 
+     
 
         //Calculate the workspace transform
-        let work_tmat = matrix![2.0*(q_0_sq + q_1_sq) - 1.0, 2.0*(q_1*q_2-q_0*q_3), 2.0*(q_1*q_3+q_0*q_2), self.curr_pos[0];
-                                                                    2.0*(q_1*q_2 + q_0*q_3), 2.0*(q_0_sq*q_2_sq) - 1.0, 2.0*(q_1*q_3 - q_0*q_1), self.curr_pos[1];
-                                                                    2.0*(q_1*q_3 - q_0*q_2), 2.0*(q_2*q_3 + q_0*q_1), 2.0*(q_0_sq + q_3_sq) - 1.0, self.curr_pos[2];
+        let work_tmat = matrix![1.0 - 2.0*(q_j_sq + q_k_sq), 2.0*(q_i*q_j - q_k*q_w), 2.0*(q_i*q_k + q_j*q_w), self.curr_pos[0];
+                                                                    2.0*(q_i*q_j + q_k*q_w), 1.0 - 2.0*(q_i_sq + q_k_sq), 2.0*(q_j*q_k - q_i*q_w), self.curr_pos[1];
+                                                                    2.0*(q_i*q_k - q_j*q_w), 2.0*(q_j*q_k + q_i*q_w), 1.0 - 2.0*(q_i_sq + q_j_sq), self.curr_pos[2];
                                                                     0.0, 0.0, 0.0, 1.0];
 
+                                                                
+                                                            
         for (i ,pcl) in pcl_list.iter_mut().enumerate(){          
             //Combine the standard transform and the position based transform            
             let tmat = TCP_TRANSFORM_LIST[i].mul(work_tmat);
@@ -213,10 +216,13 @@ impl SystemController{
 
                             let now = SystemTime::now();
                             //Go through each point cloud and transform it to the work space
-                            self.workspace_transform(&mut pcl_list);    
-                            pcl_list[0].save_to_file("/home/trl/Desktop/local_pcl");
                             println!("bnds: {:?}", pcl_list[0].bounds());
+                            self.workspace_transform(&mut pcl_list);    
+
+                            pcl_list[0].save_to_file("/home/trl/Desktop/local_pcl");
+                            println!("transformed bnds: {:?}", pcl_list[0].bounds());
                             println!(">TRANSFORM_TIME: {:?}", now.elapsed()?.as_millis());        
+
 
                             //Group the pointclouds and turn them into a heightmap - resolution based on desired resolution
                             let local_hmap = Heightmap::create_from_pcl_list_with_res(pcl_list, HMAP_RES)?;
