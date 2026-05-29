@@ -59,15 +59,16 @@ fn command_handler(mut config_manager : ConfigManager){
     //Get the cmd line arguments
     let args: Vec<String> = env::args().collect();
 
+
     if args.len() > 1{
         //If the first argument is "auto" - assume main system control
-        if args[1] == "auto"{
+        if args[1] == "-auto"{
             match SystemController::start_system_control(&mut config_manager){
 
                 Ok(mut sys_cntrller) =>{
                     println!(">Controller started");
                     
-                    let _ = sys_cntrller.auto_map_start();
+                    println!("{:?}" , sys_cntrller.auto_map_start());
 
                 }
                 Err(e) =>{
@@ -112,6 +113,7 @@ fn command_handler(mut config_manager : ConfigManager){
 
             //Quit the program
             "quit" => {
+                println!(">closing system");
                 return;
             }
 

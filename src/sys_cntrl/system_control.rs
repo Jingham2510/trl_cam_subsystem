@@ -8,8 +8,10 @@ use crate::config::config_manager::ConfigManager;
 use anyhow::bail;
 use nalgebra::{Matrix4, matrix};
 use std::io::stdin;
+use std::process::exit;
+use serialport;
 
-use std::time::{SystemTime};
+use std::time::{SystemTime, Duration};
 
 use std::ops::Mul;
 use std::{thread};
@@ -181,8 +183,22 @@ impl SystemController{
         //Spawn a std in reciever
         let mut stdin_channel = Self::spawn_auto_stdin_channel();
 
-        
 
+        //Create a serial port
+        let mut serial = serialport::new("/dev/ttyS0", 115200).timeout(Duration::from_secs(10)).open()?;
+
+
+        let mut buf : Vec<u8> = vec![0;32];
+
+        loop{
+            serial.read(buf.as_mut_slice())?;
+
+            if str::from_utf8(&buf)? == "G"{            
+                println!("Yipee");
+                exit(1);
+            }
+        }
+        
         //Do until main system instructs to stop
         loop{           
             
