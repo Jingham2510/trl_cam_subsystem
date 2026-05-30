@@ -7,9 +7,9 @@ use rustgeomapping::data_types::pointcloud::PointCloud;
 use crate::config::config_manager::ConfigManager;
 use anyhow::bail;
 use nalgebra::{Matrix4, matrix};
-use std::io::stdin;
+use std::io::{Read, stdin};
 use std::process::exit;
-use serialport;
+use std::net::UdpSocket;
 
 use std::time::{SystemTime, Duration};
 
@@ -177,24 +177,20 @@ impl SystemController{
     pub fn auto_map_start(&mut self) -> Result<(), anyhow::Error>{
         println!(">automapping start - WARNING - DO NOT TYPE");
 
-        //Alert the main system to the filepath of the heightmap file
-        println!(">FP:{}", HMAP_FP);
 
-        //Spawn a std in reciever
-        let mut stdin_channel = Self::spawn_auto_stdin_channel();
+        //Create a new network listener
+        let mut stream = UdpSocket::bind("0.0.0.0:8080")?;
+        stream.connect("192.168.55.100:8080")?;
 
-
-        //Create a serial port
-        let mut serial = serialport::new("/dev/ttyS0", 115200).timeout(Duration::from_secs(10)).open()?;
-
-
-        let mut buf : Vec<u8> = vec![0;32];
+        let mut buf : [u8; 10] = [0;10]; 
 
         loop{
-            serial.read(buf.as_mut_slice())?;
+            let n = stream.recv(buf.as_mut_slice())?;
 
-            if str::from_utf8(&buf)? == "G"{            
-                println!("Yipee");
+            let inp = str::from_utf8(&buf[..n])?;
+
+            if inp == "CONNECT?"{
+                stream.send(b"YES");
                 exit(1);
             }
         }
@@ -202,10 +198,10 @@ impl SystemController{
         //Do until main system instructs to stop
         loop{           
             
-            //Poll stdin to see if the main system has updated current position/orientation
-            if stdin_channel.has_changed()?{
-                let inp = stdin_channel.borrow_and_update().to_lowercase();
-                let inp = inp.trim();
+                let mut buf : [u8;1024] = [0; 1024];
+                let inp = str::from_utf8(&buf)?;
+
+
                 match inp{
                     //Close the connection
                     "quit" | "close" => {
@@ -262,13 +258,10 @@ impl SystemController{
                     }                    
                     
                 }
-            }            
+            }
 
+            Ok(())
         }
-
-
-        Ok(())
-    }
 
 
     ///Spawns a blocking stdin thread (blocks a different thread)
