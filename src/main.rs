@@ -14,9 +14,14 @@ use crate::config::config_manager::ConfigManager;
 use crate::sys_cntrl::system_control::SystemController;
 
 
+
+
 ///Entry point - presents the homepage
 fn main() {
 
+    unsafe{
+    env::set_var("RUST_BACKTRACE", "1");
+    }
 
     println!(">Starting config manager");
     let config_manager = ConfigManager::start_manager();
@@ -68,7 +73,9 @@ fn command_handler(mut config_manager : ConfigManager){
                 Ok(mut sys_cntrller) =>{
                     println!(">Controller started");
                     
-                    println!("{:?}" , sys_cntrller.auto_map_start());
+                    sys_cntrller.auto_map_start();
+
+                    println!(">Controller finished");
 
                 }
                 Err(e) =>{

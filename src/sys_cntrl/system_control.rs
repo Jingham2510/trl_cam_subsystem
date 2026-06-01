@@ -16,7 +16,6 @@ use std::time::{SystemTime, Duration};
 use std::ops::Mul;
 use std::{thread};
 
-use tokio::sync::watch;
 
 pub struct SystemController{
     ///The camera objects that are plugged in 
@@ -109,6 +108,7 @@ impl SystemController{
         let mut global_hmap = Heightmap::new(GLOBAL_HMAP_WIDTH, GLOBAL_HMAP_HEIGHT);
         global_hmap.set_lower_coord_bounds([0.0, 0.0]);
         global_hmap.set_upper_coord_bounds([1.5, 1.5]);
+        global_hmap.set_all_cells(f32::NAN);
 
         Ok(SystemController{
             cameras : connected_cams,
@@ -191,71 +191,99 @@ impl SystemController{
 
             if inp == "CONNECT?"{
                 stream.send(b"YES");
-                exit(1);
-            }
+                break;
+             }
         }
         
         //Do until main system instructs to stop
         loop{           
             
                 let mut buf : [u8;1024] = [0; 1024];
-                let inp = str::from_utf8(&buf)?;
+                let n = stream.recv(buf.as_mut_slice())?;
+                let inp = str::from_utf8(&buf[..n])?;
 
 
                 match inp{
                     //Close the connection
-                    "quit" | "close" => {
+                    "QUIT!" | "CLOSE!" => {
                         println!(">Closing auto system");
                         break;
                     }
+
+                    "GLOBAL_SIZE?" =>{                        
+                        let size = format!("{},{}", self.global_hmap.width(), self.global_hmap.height());
+
+                        stream.send(&size.into_bytes())?;
+                    }
+
+                    "CLOSE?" =>{
+                        println!("GRACEFULLY EXITING");
+                        exit(1)
+                    }
+
                     //Assume other messages are position/orientation instructions
                     _ => {if !self.parse_pos_ori(inp).is_ok(){
-                        println!(">Invalid pos/ori string")
+                            //println!(">{}", inp);
+                            //println!(">Invalid pos/ori string")
                         }else{
-                            //Only fire all cameras if the main system has sent a pos string - stops the and doesnt risk file being read while incomplete
+                            //Only fire all cameras if the main system has sent a pos string - stops the and doesnt risk file being read while incomplete                      
+                       
 
-                            println!(">FIRING");
-                            
-    
                             //Fire all cameras
                             let mut pcl_list = self.fire_all_cams()?;
 
                             //Crop the point cloud
                             self.standard_crop(&mut pcl_list);
 
-                           // let temp_hmap = Heightmap::create_from_pcl_list_with_res(pcl_list, HMAP_RES)?;
-                           // temp_hmap.save_to_file("/home/trl/Desktop/untransformed_local");
-
-                            let now = SystemTime::now();
                             //Go through each point cloud and transform it to the work space
-                            println!("bnds: {:?}", pcl_list[0].bounds());
                             self.workspace_transform(&mut pcl_list);    
-
-                            pcl_list[0].save_to_file("/home/trl/Desktop/local_pcl");
-                            println!("transformed bnds: {:?}", pcl_list[0].bounds());
-                            println!(">TRANSFORM_TIME: {:?}", now.elapsed()?.as_millis());        
 
 
                             //Group the pointclouds and turn them into a heightmap - resolution based on desired resolution
                             let local_hmap = Heightmap::create_from_pcl_list_with_res(pcl_list, HMAP_RES)?;
-                            local_hmap.save_to_file("/home/trl/Desktop/local");
-
-                            println!(">HEIGHTMAP_CREATION_TIME: {:?}", now.elapsed()?.as_millis());
-                            println!("ROWS:{}, COL:{}", local_hmap.height(), local_hmap.width());
-
+                            //local_hmap.save_to_file("/home/trl/Desktop/local");
                             
                             //Slot the heightmap into the global heightmap
-                            println!("{:?}", self.global_hmap.update_section(local_hmap));
-                            println!(">SLOTTING_TIME: {:?}", now.elapsed()?.as_millis());       
+                            self.global_hmap.update_section(local_hmap)?;
+
 
                             //Update the current heightmap file
-                            self.global_hmap.save_to_file(HMAP_FP)?;
-                            println!(">SAVING_TIME: {:?}", now.elapsed()?.as_millis());
+                            //self.global_hmap.save_to_file(HMAP_FP)?;
 
-                            println!(">READ");
+                            let flattened_cells = self.global_hmap.get_flattened_cells()?;
+                            
+                            //Turn the list of floats into a list of bytes
+                            let bytes : Vec<u8> = flattened_cells.into_iter().flat_map(|i| i.to_be_bytes()).collect();
+
+                            //Tell the main system how many pckets there will be 
+                            const PACKET_SIZE : usize = 512;
+                            let no_of_packets =bytes.len()/PACKET_SIZE;
+
+                            stream.send(&format!("{}", no_of_packets).into_bytes())?;
+
+                            for i in 0..no_of_packets{
+                                if i == no_of_packets{
+                                    stream.send(&bytes[(i*PACKET_SIZE)..])?;
+                                }else{                                                         
+                                    stream.send(&bytes[(i*PACKET_SIZE)..((i*PACKET_SIZE + PACKET_SIZE))])?;
+
+                                    let mut buf : [u8; 10] = [0;10]; 
+                                    //Wait for packet confirmation
+                                    loop{
+                                        let n = stream.recv(buf.as_mut_slice())?;
+                                        let inp = str::from_utf8(&buf[..n])?;
+                                        if inp == "NEXT"{
+                                            break;
+                                        }
+                                    }
+
+                                }
+                            }
+                            
 
                         };  
-                    }                    
+                    }     
+            
                     
                 }
             }
@@ -264,17 +292,7 @@ impl SystemController{
         }
 
 
-    ///Spawns a blocking stdin thread (blocks a different thread)
-    fn spawn_auto_stdin_channel() -> watch::Receiver<String> {
-        let (tx, rx) = watch::channel(String::new());
-        thread::spawn(move || loop {
-            let mut buffer = String::new();
-            stdin().read_line(&mut buffer).unwrap();
-            tx.send(buffer).unwrap();
-        });
-    rx
-    }
-
+    
     ///Parse a position/ori message through std in
     /// To minimis computation it is formated minimally and minimal error checking is done
     /// x,y,z,qw,qx,qy,qz
@@ -285,6 +303,7 @@ impl SystemController{
         let tokens : Vec<&str> = pos_ori_str.split(",").collect();
 
         if tokens.len() != 7{
+            println!("{:?}", tokens);
             bail!("Invalid pos/ori string")
         }
 
