@@ -12,6 +12,7 @@ use std::io::{Read, stdin};
 use std::process::exit;
 use std::net::UdpSocket;
 use opencv::prelude::*;
+use std::fs;
 
 
 use std::time::{SystemTime, Duration};
@@ -326,8 +327,9 @@ impl SystemController{
         //Create the aruco tag detector
 
         //Using the image and the intrinsic matrix - calculate the extrinsic matrix
-        for depth_cam in self.cameras{
+        for (i, depth_cam) in self.cameras.iter().enumerate(){
             //Load the image
+            let image = fs::read(img_filepaths[i]);
 
             //Get the positions and ids of the visible aruco tags
             let corners, ids;
