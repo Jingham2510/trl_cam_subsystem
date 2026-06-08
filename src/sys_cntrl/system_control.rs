@@ -3,13 +3,15 @@ use rustgeomapping::depth_cam::{CamType, DepthCam};
 
 
 use rustgeomapping::data_types::heightmap::Heightmap;
-use rustgeomapping::data_types::pointcloud::PointCloud;
+use rustgeomapping::data_types::pointcloud::Pointcloud;
+use rustgeomapping::data_types::intrinsic_info::IntrinsicInfo;
 use crate::config::config_manager::ConfigManager;
 use anyhow::bail;
 use nalgebra::{Matrix4, matrix};
 use std::io::{Read, stdin};
 use std::process::exit;
 use std::net::UdpSocket;
+use opencv::prelude::*;
 
 use std::time::{SystemTime, Duration};
 
@@ -292,9 +294,65 @@ impl SystemController{
         }
 
 
+
+    
+    ///Get intrinsic and extrinsic matrices based on aruco tag captures
+    /// Assumes that the cameras are already in the correct position
+    pub fn get_extrinsics(&mut self, delete_calib_imgs : bool) -> Result<(), anyhow::Error>{
+
+        
+        //For each camera get the intrinsic matrix
+        let intrinsics = self.get_all_intrinsics();
+        //Setup the filepath
+        let fp = "temp_aruco_calibration";
+        //For each camera take a colour image
+        let img_filepaths = self.fire_all_cams_image(fp);   
+
+        //Using the image and the intrinsic matrix - calculate the extrinsic matrix
+        for depth_cam in self.cameras{
+
+        }
+
+        //If delete is true - delete the images
+
+
+
+        Ok(())
+    }
+
+    ///Get each connected cameras intrinsic matrix
+    fn get_all_intrinsics(&self) -> Result<Vec<IntrinsicInfo>, anyhow::Error>{
+
+        //Request the intrinsic matrix info from the camera
+        let mut intrinsics : Vec<IntrinsicInfo> = vec![];
+
+        for cam in self.cameras{
+            intrinsics.push(cam.get_intrinsics()?)
+        }
+
+        Ok(intrinsics)
+    }
+
+    ///Get every camera to take an rgbd image
+    pub fn fire_all_cams_image(&self, base_filepath : &str) -> Result<Vec<&str>, anyhow::Error>{
+
+
+        
+        let mut filepaths : Vec<&str> = vec![];
+        
+        //Create each image and label it according to its number in the id
+        for cam self.cameras{
+            let img_fp = format!("{}_{}.png", base_filepath, cam.id());            
+            filepaths.push(cam.get_colour_image(img_fp)?);
+
+        }
+
+        Ok(filepaths)
+    }
+
     
     ///Parse a position/ori message through std in
-    /// To minimis computation it is formated minimally and minimal error checking is done
+    /// To minimise computation it is formated minimally and minimal error checking is done
     /// x,y,z,qw,qx,qy,qz
     /// 1.0,2.0,3.0,4.0,5.0,6.0,7.0
     fn parse_pos_ori(&mut self, pos_ori_str : &str) -> Result<(), anyhow::Error>{
@@ -314,8 +372,6 @@ impl SystemController{
 
 
         Ok(())
-    }
-
-  
+    }  
 
 }

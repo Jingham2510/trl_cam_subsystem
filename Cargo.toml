@@ -8,6 +8,7 @@ anyhow = "1.0.102"
 chrono = "0.4.44"
 #This has to match the nalgebra version in rustgeomapping - otherwise throws type errors
 nalgebra = "0.34.2"
+opencv = "0.98.2"
 rusb = "0.9.4"
 rustgeomapping = {version = "0.2.1", features = ["sense"]}
 
