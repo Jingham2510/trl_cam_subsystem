@@ -13,6 +13,7 @@ use std::process::exit;
 use std::net::UdpSocket;
 use opencv::prelude::*;
 
+
 use std::time::{SystemTime, Duration};
 
 use std::ops::Mul;
@@ -296,9 +297,10 @@ impl SystemController{
 
 
     
-    ///Get intrinsic and extrinsic matrices based on aruco tag captures
+    ///Calculate inverse extrinsic matrices based on aruco tag captures
     /// Assumes that the cameras are already in the correct position
-    pub fn get_extrinsics(&mut self, delete_calib_imgs : bool) -> Result<(), anyhow::Error>{
+    /// Also predefined for the board used in the TRL lab
+    pub fn calc_extrinsics_inv(&mut self, delete_calib_imgs : bool) -> Result<(), anyhow::Error>{
 
         
         //For each camera get the intrinsic matrix
@@ -306,11 +308,42 @@ impl SystemController{
         //Setup the filepath
         let fp = "temp_aruco_calibration";
         //For each camera take a colour image
-        let img_filepaths = self.fire_all_cams_image(fp);   
+        let img_filepaths = self.fire_all_cams_image(fp); 
+
+        //Define the aruco board --------------------------  
+        //Board area - center to center distance of fource aruco tags
+        const BOARD_SIZE : f32 = 0.86;
+
+        //Real world coordinates of the aruco tags
+        const MARKER_COORDS : [[f32; 3]; 4] = [[0, BOARD_SIZE, 0.0], [BOARD_SIZE, BOARD_SIZE, 0.0], [0.0, 0.0, 0.0], [BOARD_SIZE, 0.0, 0.0]];
+
+        const MARKER_SIZE : f32 = 0.29;
+
+        //Definition over---------------------------------
+
+        //Load the aruco tag dictionary and parameters
+
+        //Create the aruco tag detector
 
         //Using the image and the intrinsic matrix - calculate the extrinsic matrix
         for depth_cam in self.cameras{
+            //Load the image
 
+            //Get the positions and ids of the visible aruco tags
+            let corners, ids;
+            //If no ids exist - report
+            if ids.empty(){
+                println!("No aruco tags detected for camera {}", depth_cam.id());
+            }
+
+            //Create the object/id point pairs
+
+            //Use the object/id pairs to get rotation/translation matrices
+            
+
+            //Use the rotation and translation matrices to calculate the extrinsic matrix
+
+            //Calculate and print the extrinsic matrix inverse
         }
 
         //If delete is true - delete the images
@@ -335,8 +368,6 @@ impl SystemController{
 
     ///Get every camera to take an rgbd image
     pub fn fire_all_cams_image(&self, base_filepath : &str) -> Result<Vec<&str>, anyhow::Error>{
-
-
         
         let mut filepaths : Vec<&str> = vec![];
         
@@ -344,9 +375,7 @@ impl SystemController{
         for cam self.cameras{
             let img_fp = format!("{}_{}.png", base_filepath, cam.id());            
             filepaths.push(cam.get_colour_image(img_fp)?);
-
         }
-
         Ok(filepaths)
     }
 

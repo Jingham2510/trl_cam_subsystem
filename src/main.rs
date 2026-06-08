@@ -166,8 +166,6 @@ fn command_handler(mut config_manager : ConfigManager){
 
                     Ok(mut sys_cntrller) =>{
                         println!(">Controller started");
-
-
                         println!("{:?}", sys_cntrller.auto_map_start());
 
 
@@ -179,6 +177,25 @@ fn command_handler(mut config_manager : ConfigManager){
                 }
 
                 }
+            }
+
+            //Get extrinsics of the currently plugged in cameras
+            "get extrinsics" =>{
+                  match SystemController::start_system_control(&mut config_manager){
+
+                    Ok(mut sys_cntrller) =>{
+                        println!(">Getting extrinsics");
+
+                        sys_cntrller.calc_extrinsics_inv(false);
+
+                    }
+                    Err(e) =>{
+                        println!("{e}");
+                        println!(">Exiting system control")
+                }
+
+                }
+
             }
 
             //Catch all invalid/un=implemented commands
