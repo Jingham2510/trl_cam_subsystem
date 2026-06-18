@@ -186,7 +186,7 @@ fn command_handler(mut config_manager : ConfigManager){
                     Ok(mut sys_cntrller) =>{
                         println!(">Getting extrinsics");
 
-                        println!("{:?}", sys_cntrller.calc_calib_mats(true));
+                        println!("{:?}", sys_cntrller.calc_calib_mats(false));
 
                     }
                     Err(e) =>{
@@ -195,7 +195,31 @@ fn command_handler(mut config_manager : ConfigManager){
                 }
 
                 }
+            }
 
+            //Fire all cameras to get pointclouds
+            "get pcls" =>{
+                match SystemController::start_system_control(&mut config_manager){
+
+                    Ok(mut sys_cntrller) =>{
+                        println!("Firing all");
+
+                        let pcls = sys_cntrller.fire_all_cams().unwrap();
+
+                        let mut i = 0;
+
+                        for pcl in pcls{
+                            pcl.save_to_file(&format!("pcl_{i}"));
+                        }
+
+
+
+                    }
+                    Err(e) =>{
+                        println!("{e}");
+                        println!(">Exiting system control");
+                    }
+                }
             }
 
             //Catch all invalid/un=implemented commands
