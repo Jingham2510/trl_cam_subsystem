@@ -314,7 +314,7 @@ impl SystemController{
         //ARUCO BOARD SETUP-----------------------------
         //Center to center distance
         const BOARD_SIZE : f32 = 0.86;
-        const MARKER_COORDS : [[f32; 3]; 4] = [[0.0, BOARD_SIZE, 0.0], [BOARD_SIZE, BOARD_SIZE, 0.0], [0.0, 0.0, 0.0], [BOARD_SIZE, 0.0, 0.0]];
+        const MARKER_COORDS : [[f32; 3]; 4] = [[0.0, 0.0, 0.0], [BOARD_SIZE, 0.0, 0.0], [0.0, BOARD_SIZE, 0.0], [BOARD_SIZE, BOARD_SIZE, 0.0]];
         const MARKER_IDS : [i32;4] = [0, 1, 2, 3];
 
         //For each image calculate the inverse extrinsics 
