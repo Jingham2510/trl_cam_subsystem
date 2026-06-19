@@ -51,28 +51,36 @@ const GLOBAL_HMAP_HEIGHT : usize = (GLOBAL_AREA_HEIGHT / HMAP_RES) as usize;
 
 
 
-//The transformation from the cameras to the tcp - need to be sorted
-const CAM_A_TRANSFORM : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
-                                                0.0, 1.0, 0.0, 0.0;
-                                                0.0, 0.0, 1.0, 0.0;
+//Transformation from cam to sandbed (with relavent robot position/orientation)
+
+const FRONT_SPOKE_POS : [f32; 3] = [332.46, 2513.78, 1212.55];
+const FRONT_SPOKE_ORI : [f32; 4] = [0.00279, 0.21011, -0.97763, 0.00909];
+const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![-0.14744794,   -0.9887755, -0.024126425,    0.5055866;
+                                                0.9347581,  -0.13133782,   -0.3301175,   0.97004646;
+                                                 0.3232434,  -0.07122752,    0.9436314,   -1.1288848;
                                                 0.0, 0.0, 0.0, 1.0];
 
-const CAM_BL_TRANSFORM : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
-                                                0.0, 1.0, 0.0, 0.0;
-                                                0.0, 0.0, 1.0, 0.0;
+
+const BACK_SPOKE_L_POS : [f32; 3] = [157.63, 2199.62, 1189.65];
+const BACK_SPOKE_L_ORI : [f32; 4] = [0.00056, -0.02994, -0.99950, 0.00966];
+const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![-0.9975536, 0.009592415, -0.06924424,  0.81535965;
+                                                      -0.02083281,  -0.9863254,  0.16348799,   0.4204629;
+                                                      -0.06672911,  0.16453058,  0.98411226,  -1.0445058;
+                                                      0.0, 0.0, 0.0, 0.99999994];
+
+const BACK_SPOKE_R_POS : [f32; 3] = [740.40, 2015.91, 1212.55];
+const BACK_SPOKE_R_ORI : [f32; 4] = [0.00500, 0.45026, -0.89284, 0.00810];
+const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![0.97652954, 0.025554322,  0.21386217,  0.16984299;
+                                                0.07541232,   0.8895182,  -0.4506332,   1.1292337;
+                                                -0.20174994,  0.45618448,   0.8667137,  -1.0001591;
                                                 0.0, 0.0, 0.0, 1.0];
 
-const CAM_BR_TRANSFORM : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
-                                                0.0, 1.0, 0.0, 0.0;
-                                                0.0, 0.0, 1.0, 0.0;
-                                                0.0, 0.0, 0.0, 1.0];
-
-const TCP_TRANSFORM_LIST : [Matrix4<f32>; 3] = [CAM_A_TRANSFORM, CAM_BL_TRANSFORM, CAM_BR_TRANSFORM];
+const TCP_TRANSFORM_LIST : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM, BACK_SPOKE_L_TRANSFORM, BACK_SPOKE_R_TRANSFORM];
 
 //Default croppings for each camera
-const CAM_A_CROP : [f32;6] = [-0.15, 0.4, 0.05, 0.13, 0.3, 1.0];
-const CAM_BL_CROP : [f32;6] = [-0.5, 0.5, -0.5, 0.5, 0.0, 1.0];
-const CAM_BR_CROP : [f32;6] = [-0.5, 0.5, -0.5, 0.5, 0.0, 1.0];
+const CAM_A_CROP : [f32;6] = [-999.0, 999.0, -999.0, 999.0, -999.0, 999.0];
+const CAM_BL_CROP : [f32;6] = [-999.0, 999.0, -999.0, 999.0, -999.0, 999.0];
+const CAM_BR_CROP : [f32;6] = [-999.0, 999.0, -999.0, 999.0, -999.0, 999.0];
 
 const CROP_LIST : [[f32;6];3] = [CAM_A_CROP, CAM_BL_CROP, CAM_BR_CROP];
 
@@ -314,8 +322,8 @@ impl SystemController{
         //ARUCO BOARD SETUP-----------------------------
         //Center to center distance
         const BOARD_SIZE : f32 = 0.86;
-	//Board to sand distance
-	const BOARD_THICKNESS : f32 = 0.0185;
+        //Board to sand distance
+        const BOARD_THICKNESS : f32 = 0.0185;
         const MARKER_COORDS : [[f32; 3]; 4] = [[0.0, 0.0, BOARD_THICKNESS], [BOARD_SIZE, 0.0, BOARD_THICKNESS], [0.0, BOARD_SIZE, BOARD_THICKNESS], [BOARD_SIZE, BOARD_SIZE, BOARD_THICKNESS]];
         const MARKER_IDS : [i32;4] = [0, 1, 2, 3];
 
