@@ -210,6 +210,7 @@ fn command_handler(mut config_manager : ConfigManager){
 
                         for pcl in pcls{
                             pcl.save_to_file(&format!("pcl_{i}"));
+			    i += 1;
                         }
 
 
