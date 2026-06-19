@@ -75,14 +75,17 @@ const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![0.97652954, 0.025554322,  
                                                 -0.20174994,  0.45618448,   0.8667137,  -1.0001591;
                                                 0.0, 0.0, 0.0, 1.0];
 
+
+const OG_POS_LIST : [[f32;3] ;3] = [FRONT_SPOKE_POS, BACK_SPOKE_L_POS, BACK_SPOKE_L_POS];
+const OG_ORI_LIST : [[f32;4] ;3] = [FRONT_SPOKE_ORI, BACK_SPOKE_L_ORI, BACK_SPOKE_L_ORI];
 const TCP_TRANSFORM_LIST : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM, BACK_SPOKE_L_TRANSFORM, BACK_SPOKE_R_TRANSFORM];
 
 //Default croppings for each camera
-const CAM_A_CROP : [f32;6] = [-999.0, 999.0, -999.0, 999.0, -999.0, 999.0];
-const CAM_BL_CROP : [f32;6] = [-999.0, 999.0, -999.0, 999.0, -999.0, 999.0];
-const CAM_BR_CROP : [f32;6] = [-999.0, 999.0, -999.0, 999.0, -999.0, 999.0];
+const FRONT_SPOKE_CROP : [f32;6] = [-999.0, 999.0, -999.0, 999.0, -999.0, 999.0];
+const BACK_SPOKE_L_CROP : [f32;6] = [-999.0, 999.0, -999.0, 999.0, -999.0, 999.0];
+const BACK_SPOKE_R_CROP : [f32;6] = [-999.0, 999.0, -999.0, 999.0, -999.0, 999.0];
 
-const CROP_LIST : [[f32;6];3] = [CAM_A_CROP, CAM_BL_CROP, CAM_BR_CROP];
+const CROP_LIST : [[f32;6];3] = [FRONT_SPOKE_CROP, BACK_SPOKE_L_CROP, BACK_SPOKE_R_CROP];
 
 
 impl SystemController{
@@ -158,25 +161,36 @@ impl SystemController{
     ///Performs the combined default-workplace transform on a set of pointclouds
     fn workspace_transform(&self, pcl_list : &mut Vec<PointCloud>){
 
+        for (i ,pcl) in pcl_list.iter_mut().enumerate(){  
 
-        let [q_w, q_i, q_j, q_k] = self.curr_ori;   
+            let og_pos = OG_POS_LIST[i];
+            let og_ori = OG_ORI_LIST[i];
+
+            //Get the delta position and orientation
+            let delta_pos : [f32;3] = [og_pos[0] - self.curr_pos[0], og_pos[1] - self.curr_pos[1], og_pos[2] - self.curr_pos[2]];
+            
+            //Quaternion to quaternion requires conjugation!
+            let delta_ori : [f32;4];
+            
+            //Split quaternion for readability
+            let [q_w, q_i, q_j, q_k] = delta_ori;   
+
+            //Square the values required
+            let q_i_sq = q_i.powi(2);
+            let q_j_sq = q_j.powi(2);
+            let q_k_sq = q_k.powi(2);
 
         
-        let q_i_sq = q_i.powi(2);
-        let q_j_sq = q_j.powi(2);
-        let q_k_sq = q_k.powi(2);
 
-     
-
-        //Calculate the workspace transform
-        let work_tmat = matrix![1.0 - 2.0*(q_j_sq + q_k_sq), 2.0*(q_i*q_j - q_k*q_w), 2.0*(q_i*q_k + q_j*q_w), self.curr_pos[0];
-                                                                    2.0*(q_i*q_j + q_k*q_w), 1.0 - 2.0*(q_i_sq + q_k_sq), 2.0*(q_j*q_k - q_i*q_w), self.curr_pos[1];
-                                                                    2.0*(q_i*q_k - q_j*q_w), 2.0*(q_j*q_k + q_i*q_w), 1.0 - 2.0*(q_i_sq + q_j_sq), self.curr_pos[2];
-                                                                    0.0, 0.0, 0.0, 1.0];
+            //Calculate the workspace transform
+            let work_tmat = matrix![1.0 - 2.0*(q_j_sq + q_k_sq), 2.0*(q_i*q_j - q_k*q_w), 2.0*(q_i*q_k + q_j*q_w), delta_pos[0];
+                                                                        2.0*(q_i*q_j + q_k*q_w), 1.0 - 2.0*(q_i_sq + q_k_sq), 2.0*(q_j*q_k - q_i*q_w), delta_pos[1];
+                                                                        2.0*(q_i*q_k - q_j*q_w), 2.0*(q_j*q_k + q_i*q_w), 1.0 - 2.0*(q_i_sq + q_j_sq), delta_pos[2];
+                                                                        0.0, 0.0, 0.0, 1.0];
 
                                                                 
                                                             
-        for (i ,pcl) in pcl_list.iter_mut().enumerate(){          
+                
             //Combine the standard transform and the position based transform            
             let tmat = TCP_TRANSFORM_LIST[i].mul(work_tmat);
             
@@ -393,12 +407,12 @@ impl SystemController{
         }
 
         self.curr_pos = [tokens[0].parse()?, tokens[1].parse()?, tokens[2].parse()?];
-        self.curr_ori = [tokens[3].parse()?, tokens[4].parse()?, tokens[5].parse()?, tokens[6].parse()?];
-
-    
+        self.curr_ori = [tokens[3].parse()?, tokens[4].parse()?, tokens[5].parse()?, tokens[6].parse()?];    
 
 
         Ok(())
     }  
+
+
 
 }
