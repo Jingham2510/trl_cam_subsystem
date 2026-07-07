@@ -230,8 +230,8 @@ fn command_handler(mut config_manager : ConfigManager){
                         let mut i = 0;
 
                         for pcl in pcls{
-                            pcl.save_to_file(&format!("pcl_{i}"));
-			    i += 1;
+                            pcl.save_to_file(&format!("out/pcl_{i}"));
+			                i += 1;
                         }
 
 

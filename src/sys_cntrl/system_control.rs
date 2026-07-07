@@ -102,9 +102,11 @@ impl SystemController{
         config.update();
 
         //Check to make sure there are cameras to connect to 
-        let no_of_cams = config.no_of_cams();
+        let no_of_cams = config.no_of_cams();        
         if no_of_cams == 0{
             bail!(">No cameras to control")
+        }else{
+            println!(">{} cameras detected", no_of_cams);
         }
 
         //If valid cameras - 
