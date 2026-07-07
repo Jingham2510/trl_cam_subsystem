@@ -196,8 +196,8 @@ fn command_handler(mut config_manager : ConfigManager){
                     Err(e) =>{
                         println!("{e}");
                         println!(">Exiting system control")
+                        }
                 }
-
             }
 
             //Get extrinsics of the currently plugged in cameras
