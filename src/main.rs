@@ -179,6 +179,27 @@ fn command_handler(mut config_manager : ConfigManager){
                 }
             }
 
+            //Take photos with each rgbd camera
+            "take pic" =>{
+
+
+                match SystemController::start_system_control(&mut config_manager){
+
+                    Ok(mut sys_cntrller) =>{
+                        println!(">System started");
+                        
+                        sys_cntrller.fire_all_cams_image("out/")
+
+
+
+                    }
+                    Err(e) =>{
+                        println!("{e}");
+                        println!(">Exiting system control")
+                }
+
+            }
+
             //Get extrinsics of the currently plugged in cameras
             "get extrinsics" =>{
                   match SystemController::start_system_control(&mut config_manager){
