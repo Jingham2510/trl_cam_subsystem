@@ -188,7 +188,7 @@ fn command_handler(mut config_manager : ConfigManager){
                     Ok(mut sys_cntrller) =>{
                         println!(">System started");
                         
-                        println!("{:?}", sys_cntrller.fire_all_cams_image("out/"));
+                        println!("{:?}", sys_cntrller.fire_all_cams_image("out/fired"));
 
 
 

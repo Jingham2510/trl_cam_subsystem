@@ -397,6 +397,9 @@ impl SystemController{
         for cam in self.cameras.iter_mut(){
             let img_fp = format!("{}_{}", base_filepath, cam.id());            
             filepaths.push(cam.get_colour_image(&img_fp)?);
+
+            println!("Cam {} fired and saved", cam.id());
+
         }
         Ok(filepaths)
     }
