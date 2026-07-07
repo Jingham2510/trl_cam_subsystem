@@ -175,10 +175,10 @@ impl SystemController{
                 let inv_curr_q = [self.curr_ori[0], -self.curr_ori[1], -self.curr_ori[2], -self.curr_ori[3]];
 
                 //The delta is equal to the end orientation multiplied by the inverse of the start orientation
-                [  og_pos[0]*inv_curr_q[0] - og_pos[1]*inv_curr_q[1] - og_pos[2]*inv_curr_q[2] - og_pos[3]*inv_curr_q[3],
-                   og_pos[0]*inv_curr_q[1] + og_pos[1]*inv_curr_q[0] - og_pos[2]*inv_curr_q[3] + og_pos[3]*inv_curr_q[2], 
-                   og_pos[0]*inv_curr_q[2] + og_pos[1]*inv_curr_q[3] + og_pos[2]*inv_curr_q[0] - og_pos[3]*inv_curr_q[1],
-                   og_pos[0]*inv_curr_q[3] - og_pos[1]*inv_curr_q[2] + og_pos[2]*inv_curr_q[1] + og_pos[3]*inv_curr_q[0]]
+                [  og_ori[0]*inv_curr_q[0] - og_ori[1]*inv_curr_q[1] - og_ori[2]*inv_curr_q[2] - og_ori[3]*inv_curr_q[3],
+                   og_ori[0]*inv_curr_q[1] + og_ori[1]*inv_curr_q[0] - og_ori[2]*inv_curr_q[3] + og_ori[3]*inv_curr_q[2], 
+                   og_ori[0]*inv_curr_q[2] + og_ori[1]*inv_curr_q[3] + og_ori[2]*inv_curr_q[0] - og_ori[3]*inv_curr_q[1],
+                   og_ori[0]*inv_curr_q[3] - og_ori[1]*inv_curr_q[2] + og_ori[2]*inv_curr_q[1] + og_ori[3]*inv_curr_q[0]]
 
             };
             
