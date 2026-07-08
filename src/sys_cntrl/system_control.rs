@@ -155,6 +155,10 @@ impl SystemController{
     ///Fire all the cameras and perform the workplace transform on each of them
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
+
+        self.curr_pos = FRONT_SPOKE_POS;
+        self.curr_ori = FRONT_SPOKE_ORI;
+
          let mut pcl_vec = self.fire_all_cams()?;
 
         self.workspace_transform(&mut pcl_vec);
@@ -197,6 +201,8 @@ impl SystemController{
                    og_ori[0]*inv_curr_q[3] - og_ori[1]*inv_curr_q[2] + og_ori[2]*inv_curr_q[1] + og_ori[3]*inv_curr_q[0]]
 
             };
+
+            
             
             //Split quaternion for readability
             let [q_w, q_i, q_j, q_k] = delta_ori;   
