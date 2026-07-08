@@ -201,12 +201,6 @@ impl SystemController{
                    og_ori[0]*inv_curr_q[3] - og_ori[1]*inv_curr_q[2] + og_ori[2]*inv_curr_q[1] + og_ori[3]*inv_curr_q[0]]
 
             };
-
-
-            println!("{:?}", delta_pos);
-            println!("{:?}", delta_ori);
-
-
             
             
             //Split quaternion for readability
@@ -225,13 +219,14 @@ impl SystemController{
                                                                         2.0*(q_i*q_k - q_j*q_w), 2.0*(q_j*q_k + q_i*q_w), 1.0 - 2.0*(q_i_sq + q_j_sq), delta_pos[2];
                                                                         0.0, 0.0, 0.0, 1.0];
 
-            println!("del_TMAT: {}", work_tmat);
+            
 
                                                                 
                                                             
                 
             //Combine the standard transform and the position based transform            
             let tmat = TCP_TRANSFORM_LIST[i].mul(work_tmat);
+            println!("TMAT: {}", tmat);
             
             pcl.transform_with(&tmat);
         }
