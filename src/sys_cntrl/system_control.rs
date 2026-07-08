@@ -202,6 +202,11 @@ impl SystemController{
 
             };
 
+
+            println!("{:?}", delta_pos);
+            println!("{:?}", delta_ori);
+
+
             
             
             //Split quaternion for readability
@@ -219,6 +224,8 @@ impl SystemController{
                                                                         2.0*(q_i*q_j + q_k*q_w), 1.0 - 2.0*(q_i_sq + q_k_sq), 2.0*(q_j*q_k - q_i*q_w), delta_pos[1];
                                                                         2.0*(q_i*q_k - q_j*q_w), 2.0*(q_j*q_k + q_i*q_w), 1.0 - 2.0*(q_i_sq + q_j_sq), delta_pos[2];
                                                                         0.0, 0.0, 0.0, 1.0];
+
+            println!("del_TMAT: {}", work_tmat);
 
                                                                 
                                                             
@@ -367,7 +374,7 @@ impl SystemController{
 
         //ARUCO BOARD SETUP-----------------------------
         //Center to center distance
-        const BOARD_SIZE : f32 = 0.86;
+        const BOARD_SIZE : f32 = 0.85;
         //Board to sand distance
         const BOARD_THICKNESS : f32 = 0.0185;
         const MARKER_COORDS : [[f32; 3]; 4] = [[0.0, 0.0, BOARD_THICKNESS], [BOARD_SIZE, 0.0, BOARD_THICKNESS], [0.0, BOARD_SIZE, BOARD_THICKNESS], [BOARD_SIZE, BOARD_SIZE, BOARD_THICKNESS]];
