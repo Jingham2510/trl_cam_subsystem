@@ -211,7 +211,6 @@ impl SystemController{
             let q_i_sq = q_i.powi(2);
             let q_j_sq = q_j.powi(2);
             let q_k_sq = q_k.powi(2);
-
         
 
             //Calculate the workspace transform
