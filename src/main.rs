@@ -236,7 +236,7 @@ fn command_handler(mut config_manager : ConfigManager){
                         println!("Firing all");
 
                         //let pcls = sys_cntrller.fire_and_transform().unwrap();
-                        let pcls = sys_cntrller.fire_all_cams().unwrap();
+                        let pcls = sys_cntrller.fire_and_transform().unwrap();
 
                         let mut i = 0;
 
