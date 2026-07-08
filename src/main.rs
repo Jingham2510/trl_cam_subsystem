@@ -231,7 +231,7 @@ fn command_handler(mut config_manager : ConfigManager){
                         println!("Warming up");
 
                         //Sleep for two to let the frames start streaming
-                        sleep(Duration::from_seconds(2));
+                        sleep(Duration::from_secs(2));
 
                         println!("Firing all");
 
