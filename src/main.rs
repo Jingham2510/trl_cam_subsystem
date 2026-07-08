@@ -223,6 +223,12 @@ fn command_handler(mut config_manager : ConfigManager){
                 match SystemController::start_system_control(&mut config_manager){
 
                     Ok(mut sys_cntrller) =>{
+
+                        println!("Warming up");
+
+                        //Sleep for two to let the frames start streaming
+                        sleep(Duration::from_secs(2));
+
                         println!("Firing all");
 
                         let pcls = sys_cntrller.fire_and_transform().unwrap();

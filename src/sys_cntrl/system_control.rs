@@ -128,6 +128,7 @@ impl SystemController{
         global_hmap.set_upper_coord_bounds([1.5, 1.5]);
         global_hmap.set_all_cells(f32::NAN);
 
+
         Ok(SystemController{
             cameras : connected_cams,
             global_hmap,
@@ -142,7 +143,8 @@ impl SystemController{
     
         let mut pcl_vec : Vec<PointCloud> = vec![];
 
-        for (i, cam) in self.cameras.iter_mut().enumerate(){     
+        for (i, cam) in self.cameras.iter_mut().enumerate(){   
+
             
             pcl_vec.push(cam.take_pcl()?);
         }
