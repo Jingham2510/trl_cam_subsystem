@@ -1,4 +1,5 @@
 //!Controls the system when in autonomous mode - i.e. Robot moving and heightmap being generated
+use rustgeomapping::backend::realsense::realsense_cam::RealsenseCam;
 use rustgeomapping::depth_cam::{CamType, DepthCam};
 
 
@@ -138,7 +139,6 @@ impl SystemController{
 
     ///Fire all of the depth cameras the system controls and saves the pointclouds
     pub fn fire_all_cams(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
-
     
         let mut pcl_vec : Vec<PointCloud> = vec![];
 
@@ -442,6 +442,12 @@ impl SystemController{
 
         Ok(())
     }  
+
+
+    ///Reset all connected hardware
+    pub fn reset_hardware() -> Result<(), anyhow::Error>{
+        RealsenseCam::reset_all()
+    }
 
 
 

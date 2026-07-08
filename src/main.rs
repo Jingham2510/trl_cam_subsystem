@@ -234,8 +234,6 @@ fn command_handler(mut config_manager : ConfigManager){
 			                i += 1;
                         }
 
-
-
                     }
                     Err(e) =>{
                         println!("{e}");
@@ -243,6 +241,12 @@ fn command_handler(mut config_manager : ConfigManager){
                     }
                 }
             }
+
+            //Reset the cams
+            "reset cams" =>{
+                SystemController::reset_hardware();
+            }
+
 
             //Catch all invalid/un=implemented commands
             _ => {println!(">Invalid command - see 'help' for a list of available commands")}
