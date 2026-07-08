@@ -227,9 +227,12 @@ impl SystemController{
                 
             //Combine the standard transform and the position based transform            
             let tmat = TCP_TRANSFORM_LIST[i].mul(work_tmat);
-            println!("TMAT: {}", tmat);
-            
+
+            println!("{}", pcl.points()[2]);
+
             pcl.transform_with(&tmat);
+
+            println!("{}", pcl.points()[2]);
         }
     }
 
