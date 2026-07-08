@@ -381,6 +381,10 @@ impl SystemController{
             println!(">----------CAM: {}-------------", i);
 
             if let Ok(extrinsic_inv) = get_extrinsic_inv_from_aruco_4x4_250(&image, MARKER_IDS.to_vec(), MARKER_COORDS.to_vec(), &intrinsics[i]){
+                println!(">-----extrinsics-----");
+                println!(">{}", extrinsic_inv.try_inverse().unwrap());
+                
+                println!(">-----inverse extrinsics-----");
                 println!(">{}", extrinsic_inv);
             }else{
                 println!(">Failed to calc extrinsics for cam");
