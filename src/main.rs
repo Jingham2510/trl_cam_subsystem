@@ -225,7 +225,7 @@ fn command_handler(mut config_manager : ConfigManager){
                     Ok(mut sys_cntrller) =>{
                         println!("Firing all");
 
-                        let pcls = sys_cntrller.fire_and_transform()?;
+                        let pcls = sys_cntrller.fire_and_transform().unwrap();
 
                         let mut i = 0;
 
