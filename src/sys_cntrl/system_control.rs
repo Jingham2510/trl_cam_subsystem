@@ -12,7 +12,7 @@ use nalgebra::{Matrix4, matrix};
 use std::io::{Read, stdin};
 use std::process::exit;
 use std::net::UdpSocket;
-use std::fs;
+use std::{any, fs};
 
 
 use std::time::{SystemTime, Duration};
@@ -148,6 +148,18 @@ impl SystemController{
         }
      
         Ok(pcl_vec)
+    }
+
+    ///Fire all the cameras and perform the workplace transform on each of them
+    pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
+
+         let mut pcl_vec = self.fire_all_cams()?;
+
+        self.workspace_transform(&mut pcl_vec);
+     
+        Ok(pcl_vec)
+
+
     }
 
     ///Performs the default crop on a list of pointclouds
