@@ -54,11 +54,11 @@ const GLOBAL_HMAP_HEIGHT : usize = (GLOBAL_AREA_HEIGHT / HMAP_RES) as usize;
 
 //Transformation from cam to sandbed (with relavent robot position/orientation)
 
-const FRONT_SPOKE_POS : [f32; 3] = [332.46, 2513.78, 1212.55];
-const FRONT_SPOKE_ORI : [f32; 4] = [0.00279, 0.21011, -0.97763, 0.00909];
-const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![-0.14744794,   -0.9887755, -0.024126425,    0.5055866;
-                                                0.9347581,  -0.13133782,   -0.3301175,   0.97004646;
-                                                 0.3232434,  -0.07122752,    0.9436314,   -1.1288848;
+const FRONT_SPOKE_POS : [f32; 3] = [363.68, 2560.87, 1108.80];
+const FRONT_SPOKE_ORI : [f32; 4] = [0.00707, 0.08880, -0.99590, -0.01560];
+const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![-0.32067466,   -0.90342516, -0.2458858,    1.2142341;
+                                                0.8130779,  -0.10842945,   -0.571968,   0.6566838;
+                                                 0.4858725,  -0.41480833,    0.7693257,   -0.7257901;
                                                 0.0, 0.0, 0.0, 1.0];
 
 
