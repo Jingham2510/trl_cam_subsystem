@@ -364,6 +364,9 @@ impl SystemController{
         
         //For each camera get the intrinsic matrix
         let intrinsics = self.get_all_intrinsics()?;
+
+        println!("intrinsics: {:?}", intrinsics);
+
         //Setup the filepath
         let fp = "temp_aruco_calibration";
         //For each camera take a colour image
