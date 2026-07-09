@@ -227,10 +227,10 @@ impl SystemController{
             //Combine the standard transform and the position based transform            
             //let tmat = TCP_TRANSFORM_LIST[i].mul(work_tmat);
 
-            println!("{}", tmat);
+            //println!("{}", tmat);
 
 
-            pcl.transform_with(&tmat);
+            //pcl.transform_with(&tmat);
 
         }
     }
