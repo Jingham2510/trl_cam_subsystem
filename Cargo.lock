@@ -1275,9 +1275,9 @@ dependencies = [
 
 [[package]]
 name = "rustgeomapping"
-version = "0.2.31"
+version = "0.2.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a7989359e68758c1fa7fa7082b46143dfea6757671922ab641f63652e0f3b01"
+checksum = "5ec9834c8c80f858533a47ca736ce0df95a73821d80d06c14a64a39c8b30957a"
 dependencies = [
  "anyhow",
  "chrono",
