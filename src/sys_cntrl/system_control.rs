@@ -54,11 +54,11 @@ const GLOBAL_HMAP_HEIGHT : usize = (GLOBAL_AREA_HEIGHT / HMAP_RES) as usize;
 
 //Transformation from cam to sandbed (with relavent robot position/orientation)
 
-const FRONT_SPOKE_POS : [f32; 3] = [363.68, 2560.87, 1108.80];
-const FRONT_SPOKE_ORI : [f32; 4] = [0.00707, 0.08880, -0.99590, -0.01560];
-const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![-0.15992503, -0.966232, -0.20203921,  1.1561065; 
-                                                     0.9865274, -0.14929745,  -0.06689019, 0.04261592;
-                                                    0.034467507, -0.21001458,   0.9770906, -0.75761086;
+const FRONT_SPOKE_POS : [f32; 3] = [417.67, 2536.85, 1075.80];
+const FRONT_SPOKE_ORI : [f32; 4] = [0.00130, -0.11326, 0.99354, 0.00640];
+const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![-0.10433076, -0.9731299, -0.20526417, 0.9664669;
+                                                    0.99424094, -0.096969225, -0.045630243,  -0.18952772;
+                                                    0.024499848,  -0.20884266,    0.9776424,  -0.99913776;
                                                     0.0,          0.0,          0.0,          1.        ];
 
 
@@ -226,6 +226,8 @@ impl SystemController{
                 
             //Combine the standard transform and the position based transform            
             let tmat = TCP_TRANSFORM_LIST[i].mul(work_tmat);
+
+            println!("{:?}", tmat);
 
 
             pcl.transform_with(&tmat);
