@@ -372,7 +372,7 @@ impl SystemController{
 
         //ARUCO BOARD SETUP-----------------------------
         //Center to center distance
-        const BOARD_SIZE : f32 = 0.79.7;
+        const BOARD_SIZE : f32 = 0.797;
         //Board to sand distance
         const BOARD_THICKNESS : f32 = 0.0185;
         const MARKER_COORDS : [[f32; 3]; 4] = [[0.0, 0.0, BOARD_THICKNESS], [BOARD_SIZE, 0.0, BOARD_THICKNESS],  [BOARD_SIZE, BOARD_SIZE, BOARD_THICKNESS], [0.0, BOARD_SIZE, BOARD_THICKNESS]];
