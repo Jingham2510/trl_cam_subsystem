@@ -63,12 +63,12 @@ const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![0.9977538, -0.031512104, -0
 
 
 
-const BACK_SPOKE_L_POS : [f32; 3] = [157.63, 2199.62, 1189.65];
-const BACK_SPOKE_L_ORI : [f32; 4] = [0.00056, -0.02994, -0.99950, 0.00966];
-const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![-0.9975536, 0.009592415, -0.06924424,  0.81535965;
-                                                      -0.02083281,  -0.9863254,  0.16348799,   0.4204629;
-                                                      -0.06672911,  0.16453058,  0.98411226,  -1.0445058;
-                                                      0.0, 0.0, 0.0, 0.99999994];
+const BACK_SPOKE_L_POS : [f32; 3] = [203.14, 2065.79, 1075.95];
+const BACK_SPOKE_L_ORI : [f32; 4] = [0.00013, 0.06956, 0.99756, 0.00660];
+const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![0.01105789,   -0.9529749,   0.30284756,  -0.07730941;
+                                                      0.9999226,  0.012272284, 0.0021071497,    0.5293364;
+                                                      -0.005724692,    0.3028008,    0.9530368,   -1.2832978;
+                                                      0.0, 0.0, 0.0, 1.0];
 
 const BACK_SPOKE_R_POS : [f32; 3] = [740.40, 2015.91, 1212.55];
 const BACK_SPOKE_R_ORI : [f32; 4] = [0.00500, 0.45026, -0.89284, 0.00810];
@@ -157,8 +157,8 @@ impl SystemController{
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
 
-        self.curr_pos = FRONT_SPOKE_POS;
-        self.curr_ori = FRONT_SPOKE_ORI;
+        self.curr_pos = BACK_SPOKE_L_POS;
+        self.curr_ori = BACK_SPOKE_L_ORI;
 
          let mut pcl_vec = self.fire_all_cams()?;
 
