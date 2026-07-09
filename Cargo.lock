@@ -1230,9 +1230,9 @@ checksum = "03251193000f4bd3b042892be858ee50e8b3719f2b08e5833ac4353724632430"
 
 [[package]]
 name = "regex"
-version = "1.12.4"
+version = "1.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1292b7759ae1cb9ec195452d1390a074f0cd8541ab7a5a8c31cd6db45d4a6ba"
+checksum = "2a0e75113e14dc5acb068cd0786884f214f1312650a3d36d269f5c4f3cdee8a2"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -1242,9 +1242,9 @@ dependencies = [
 
 [[package]]
 name = "regex-automata"
-version = "0.4.14"
+version = "0.4.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6e1dd4122fc1595e8162618945476892eefca7b88c52820e74af6262213cae8f"
+checksum = "1f388202e4b80542a0921078cc23b6333bcf1409c1e3f86404cae4766a6131db"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -1276,7 +1276,7 @@ dependencies = [
 [[package]]
 name = "rustgeomapping"
 version = "0.2.33"
-source = "git+https://github.com/Jingham2510/rustgeomapping#a9f2138abd5e63dd536e23634cb3fce1d8f5b4b3"
+source = "git+https://github.com/Jingham2510/rustgeomapping#68f4f212e57f414511ee587d3ff99fc9749e294b"
 dependencies = [
  "anyhow",
  "chrono",
