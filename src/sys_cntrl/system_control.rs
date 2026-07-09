@@ -375,7 +375,7 @@ impl SystemController{
         const BOARD_SIZE : f32 = 0.85;
         //Board to sand distance
         const BOARD_THICKNESS : f32 = 0.0185;
-        const MARKER_COORDS : [[f32; 3]; 4] = [[0.0, 0.0, BOARD_THICKNESS], [BOARD_SIZE, 0.0, BOARD_THICKNESS], [0.0, -BOARD_SIZE, BOARD_THICKNESS], [BOARD_SIZE, -BOARD_SIZE, BOARD_THICKNESS]];
+        const MARKER_COORDS : [[f32; 3]; 4] = [[0.0, 0.0, BOARD_THICKNESS], [BOARD_SIZE, 0.0, BOARD_THICKNESS], [0.0, BOARD_SIZE, BOARD_THICKNESS], [BOARD_SIZE, BOARD_SIZE, BOARD_THICKNESS]];
         const MARKER_IDS : [i32;4] = [0, 1, 2, 3];
 
         //For each image calculate the inverse extrinsics 
