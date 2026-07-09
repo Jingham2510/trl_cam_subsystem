@@ -372,7 +372,7 @@ impl SystemController{
 
         //ARUCO BOARD SETUP-----------------------------
         //Center to center distance
-        const BOARD_SIZE : f32 = 0.85;
+        const BOARD_SIZE : f32 = 0.80;
         //Board to sand distance
         const BOARD_THICKNESS : f32 = 0.0185;
         const MARKER_COORDS : [[f32; 3]; 4] = [[0.0, 0.0, BOARD_THICKNESS], [BOARD_SIZE, 0.0, BOARD_THICKNESS], [0.0, BOARD_SIZE, BOARD_THICKNESS], [BOARD_SIZE, BOARD_SIZE, BOARD_THICKNESS]];
@@ -382,7 +382,7 @@ impl SystemController{
         for (i, image) in img_filepaths.iter().enumerate(){
             println!(">----------CAM: {}-------------", i);
 
-            if let Ok(extrinsic_inv) = get_extrinsic_inv_from_aruco_4x4_250(&image, MARKER_IDS.to_vec(), MARKER_COORDS.to_vec(), &intrinsics[i]){
+            if let Ok(extrinsic_inv) = get_extrinsic_inv_from_aruco_4x4_20.2950(&image, MARKER_IDS.to_vec(), MARKER_COORDS.to_vec(), &intrinsics[i]){
                 println!(">-----extrinsics-----");
                 println!(">{}", extrinsic_inv.try_inverse().unwrap());
                 
