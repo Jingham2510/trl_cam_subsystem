@@ -382,7 +382,7 @@ impl SystemController{
         for (i, image) in img_filepaths.iter().enumerate(){
             println!(">----------CAM: {}-------------", i);
 
-            if let Ok(extrinsic_inv) = get_extrinsic_inv_from_aruco_4x4_20.2950(&image, MARKER_IDS.to_vec(), MARKER_COORDS.to_vec(), &intrinsics[i]){
+            if let Ok(extrinsic_inv) = get_extrinsic_inv_from_aruco_4x4_20.250(&image, MARKER_IDS.to_vec(), MARKER_COORDS.to_vec(), &intrinsics[i]){
                 println!(">-----extrinsics-----");
                 println!(">{}", extrinsic_inv.try_inverse().unwrap());
                 
