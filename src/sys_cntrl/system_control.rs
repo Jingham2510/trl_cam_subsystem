@@ -220,6 +220,7 @@ impl SystemController{
                                                                         0.0, 0.0, 0.0, 1.0];
 
             
+            println!("Work: {}", work_tmat);
 
                                                                 
                                                             
