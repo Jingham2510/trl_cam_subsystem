@@ -226,7 +226,7 @@ impl SystemController{
                                                             
                 
             //Combine the standard transform and the position based transform            
-            let tmat =   TCP_TRANSFORM_LIST[i] * work_tmat.try_inverse().unwrap();
+            let tmat =   TCP_TRANSFORM_LIST[i] * work_tmat;
 
             println!("{}", tmat);
 
