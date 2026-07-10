@@ -98,7 +98,8 @@ const BACK_SPOKE_R_ADJ : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
 
 const OG_POS_LIST : [[f32;3] ;3] = [FRONT_SPOKE_POS, BACK_SPOKE_L_POS, BACK_SPOKE_R_POS];
 const OG_ORI_LIST : [[f32;4] ;3] = [FRONT_SPOKE_ORI, BACK_SPOKE_L_ORI, BACK_SPOKE_R_ORI];
-const TCP_TRANSFORM_LIST : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM * FRONT_SPOKE_ADJ, BACK_SPOKE_L_TRANSFORM * BACK_SPOKE_L_ADJ, BACK_SPOKE_R_TRANSFORM * BACK_SPOKE_R_ADJ];
+const TCP_TRANSFORM_LIST : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM , BACK_SPOKE_L_TRANSFORM , BACK_SPOKE_R_TRANSFORM ];
+const ADJ_LIST : [Matrix4<f32>; 3] = [FRONT_SPOKE_ADJ, BACK_SPOKE_L_ADJ, BACK_SPOKE_R_ADJ];
 
 
 //Default croppings for each camera
@@ -238,15 +239,13 @@ impl SystemController{
                                                                         2.0*(q_i*q_k - q_j*q_w), 2.0*(q_j*q_k + q_i*q_w), 1.0 - 2.0*(q_i_sq + q_j_sq), delta_pos[2];
                                                                         0.0, 0.0, 0.0, 1.0];
 
-            
-            println!("Work: {}", work_tmat);
+        
 
                                                                 
                                                             
                 
             //Combine the standard transform and the position based transform            
-            let tmat = work_tmat.try_inverse().unwrap() * TCP_TRANSFORM_LIST[i];
-            println!("{}", tmat);
+            let tmat = work_tmat.try_inverse().unwrap() * TCP_TRANSFORM_LIST[i] * ADJ_LIST[i];
 
 
             pcl.transform_with(&tmat);
