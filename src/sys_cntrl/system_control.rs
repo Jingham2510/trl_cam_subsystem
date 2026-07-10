@@ -188,7 +188,7 @@ impl SystemController{
             let og_ori = OG_ORI_LIST[i];
 
             //Get the delta position and orientation
-            let delta_pos : [f32;3] = [(self.curr_pos[0] - og_pos[0]) / 1000, (self.curr_pos[1] - og_pos[1]) / 1000, (self.curr_pos[2] - og_pos[2]) / 1000];
+            let delta_pos : [f32;3] = [(self.curr_pos[0] - og_pos[0]) / 1000.0, (self.curr_pos[1] - og_pos[1]) / 1000.0, (self.curr_pos[2] - og_pos[2]) / 1000.0];
             
             //Get the quaternion that rotates to the original calibration orientation
             let delta_ori : [f32;4] = {
