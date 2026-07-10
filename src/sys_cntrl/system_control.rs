@@ -229,7 +229,7 @@ impl SystemController{
             println!("{}", pos_to_calib_pos);
                 
             //Combine the standard transform and the position based transform            
-            let tmat =   pos_to_calib_pos * CAM_CALIB_TO_WORLD_TRANSFORM[i];
+            let tmat =   CAM_CALIB_TO_WORLD_TRANSFORM[i] * pos_to_calib_pos;
 
 
             pcl.transform_with(&tmat);
