@@ -199,7 +199,7 @@ impl SystemController{
             );
 
             // Rotation that carries calibration orientation -> current orientation
-            let delta_rot: UnitQuaternion<f32> = q_curr * q_og.inverse();
+            let delta_rot: UnitQuaternion<f32> =  q_og * q_curr.inverse();
 
             // Positions in metres
             let og_pos_m = Vector3::new(og_pos[0], og_pos[1], og_pos[2]) / 1000.0;
