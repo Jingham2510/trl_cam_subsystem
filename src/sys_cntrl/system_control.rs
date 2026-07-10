@@ -62,6 +62,12 @@ const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![0.9977538, -0.031512104, -0
                                                     0.0,          0.0,          0.0,          1.    ];
 
 
+const FRONT_SPOKE_ADJ : Matrix4<f32> = matrix![0.998068, -0.008599, -0.061541, 0.000803;
+0.000000, 0.990379, -0.138381, -0.004867;
+0.062138, 0.138113, 0.988465, -0.126896;
+0.000000, 0.000000, 0.000000, 1.000000];
+
+
 
 const BACK_SPOKE_L_POS : [f32; 3] = [203.14, 2065.79, 1075.95];
 const BACK_SPOKE_L_ORI : [f32; 4] = [0.00013, 0.06956, 0.99756, 0.00660];
@@ -70,20 +76,30 @@ const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![0.01105789,   -0.9529749, 
                                                       -0.005724692,    0.3028008,    0.9530368,   -1.2832978;
                                                       0.0, 0.0, 0.0, 1.0];
 
+const BACK_SPOKE_L_ADJ : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
+                                               0.0, 1.0, 0.0, 0.0;
+                                                0.0, 0.0, 1.0, 0.0;
+                                                0.0, 0.0, 0.0, 1.0];
 
-//const BACK_SPOKE_R_POS : [f32; 3] = [1033.26, 1724.30, 1316.60];
+
+const BACK_SPOKE_R_POS : [f32; 3] = [1033.26, 1724.30, 1316.60];
 //Hand tuned corrections
-const BACK_SPOKE_R_POS : [f32; 3] = [1033.26 - 1129.9, 1724.30 - 37.1, 1316.60];
+//const BACK_SPOKE_R_POS : [f32; 3] = [1033.26 - 1129.9, 1724.30 - 37.1, 1316.60];
 const BACK_SPOKE_R_ORI : [f32; 4] = [0.02676, 0.17529, -0.98414, 0.00474];
 const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![0.43745154,   0.7777199, -0.45142877,   1.3026029;
                                                 -0.89837676,  0.39998746, -0.18146408,    1.017233 ;
                                                 0.03943765,  0.48493487,  0.87366056,   -1.484466;
                                                 0.0, 0.0, 0.0, 1.0];
 
+const BACK_SPOKE_R_ADJ : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
+                                               0.0, 1.0, 0.0, 0.0;
+                                                0.0, 0.0, 1.0, 0.0;
+                                                0.0, 0.0, 0.0, 1.0];
 
 const OG_POS_LIST : [[f32;3] ;3] = [FRONT_SPOKE_POS, BACK_SPOKE_L_POS, BACK_SPOKE_R_POS];
 const OG_ORI_LIST : [[f32;4] ;3] = [FRONT_SPOKE_ORI, BACK_SPOKE_L_ORI, BACK_SPOKE_R_ORI];
-const TCP_TRANSFORM_LIST : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM, BACK_SPOKE_L_TRANSFORM, BACK_SPOKE_R_TRANSFORM];
+const TCP_TRANSFORM_LIST : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM * FRONT_SPOKE_ADJ, BACK_SPOKE_L_TRANSFORM * BACK_SPOKE_L_ADJ, BACK_SPOKE_R_TRANSFORM * BACK_SPOKE_R_ADJ];
+
 
 //Default croppings for each camera
 const FRONT_SPOKE_CROP : [f32;6] = [-999.0, 999.0, -999.0, 999.0, -999.0, 999.0];
