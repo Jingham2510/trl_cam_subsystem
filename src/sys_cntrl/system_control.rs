@@ -157,8 +157,8 @@ impl SystemController{
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
 
-        self.curr_pos = BACK_SPOKE_R_POS;
-        self.curr_ori = BACK_SPOKE_R_ORI;
+        self.curr_pos = [711.85, 1919.60, 718.48];
+        self.curr_ori = [0.02680, 0.17524, -0.98415, 0.00478];
 
         let mut pcl_vec = self.fire_all_cams()?;
 
@@ -226,12 +226,7 @@ impl SystemController{
                                                             
                 
             //Combine the standard transform and the position based transform            
-            let tmat = if i != 2{
-                   work_tmat.try_inverse().unwrap() * TCP_TRANSFORM_LIST[i]
-            }else{
-                TCP_TRANSFORM_LIST[i] *  work_tmat.try_inverse().unwrap()
-            };
-
+            let tmat = work_tmat.try_inverse().unwrap() * TCP_TRANSFORM_LIST[i];
             println!("{}", tmat);
 
 
