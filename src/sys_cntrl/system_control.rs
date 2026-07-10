@@ -208,14 +208,14 @@ impl SystemController{
             // Translation accounting for pivot at og_pos: t = curr_pos - R * og_pos
             let translation = curr_pos_m - delta_rot * og_pos_m;
 
-            let pos_to_calib_pos: Matrix4<f32> =
+            let calib_to_pos_trans: Matrix4<f32> =
                 Translation3::from(translation).to_homogeneous() * delta_rot.to_homogeneous();
                 
             //Combine the standard transform and the position based transform            
-            let tmat =    CAM_CALIB_TO_WORLD_TRANSFORM[i] * pos_to_calib_pos.try_inverse().unwrap();
+            let current_to_world =    CAM_CALIB_TO_WORLD_TRANSFORM[i].try_inverse().unwrap() * calib_to_pos_trans.try_inverse().unwrap();
 
 
-            pcl.transform_with(&tmat);         
+            pcl.transform_with(&current_to_world);         
 
             
 
