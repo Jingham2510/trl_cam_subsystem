@@ -62,12 +62,6 @@ const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![0.9977538, -0.031512104, -0
                                                     0.0,          0.0,          0.0,          1.    ];
 
 
-const FRONT_SPOKE_ADJ : Matrix4<f32> = matrix![0.998068, -0.008599, -0.061541, 0.000803;
-0.000000, 0.990379, -0.138381, -0.004867;
-0.062138, 0.138113, 0.988465, -0.126896;
-0.000000, 0.000000, 0.000000, 1.000000];
-
-
 
 const BACK_SPOKE_L_POS : [f32; 3] = [203.14, 2065.79, 1075.95];
 const BACK_SPOKE_L_ORI : [f32; 4] = [0.00013, 0.06956, 0.99756, 0.00660];
@@ -91,15 +85,9 @@ const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![0.43745154,   0.7777199, -
                                                 0.03943765,  0.48493487,  0.87366056,   -1.484466;
                                                 0.0, 0.0, 0.0, 1.0];
 
-const BACK_SPOKE_R_ADJ : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
-                                               0.0, 1.0, 0.0, 0.0;
-                                                0.0, 0.0, 1.0, 0.0;
-                                                0.0, 0.0, 0.0, 1.0];
-
 const OG_POS_LIST : [[f32;3] ;3] = [FRONT_SPOKE_POS, BACK_SPOKE_L_POS, BACK_SPOKE_R_POS];
 const OG_ORI_LIST : [[f32;4] ;3] = [FRONT_SPOKE_ORI, BACK_SPOKE_L_ORI, BACK_SPOKE_R_ORI];
 const TCP_TRANSFORM_LIST : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM , BACK_SPOKE_L_TRANSFORM , BACK_SPOKE_R_TRANSFORM ];
-const ADJ_LIST : [Matrix4<f32>; 3] = [FRONT_SPOKE_ADJ, BACK_SPOKE_L_ADJ, BACK_SPOKE_R_ADJ];
 
 
 //Default croppings for each camera
@@ -245,7 +233,7 @@ impl SystemController{
                                                             
                 
             //Combine the standard transform and the position based transform            
-            let tmat = work_tmat.try_inverse().unwrap() * TCP_TRANSFORM_LIST[i] * ADJ_LIST[i];
+            let tmat = work_tmat.try_inverse().unwrap() * TCP_TRANSFORM_LIST[i];
 
 
             pcl.transform_with(&tmat);
