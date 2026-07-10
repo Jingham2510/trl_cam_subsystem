@@ -198,9 +198,9 @@ impl SystemController{
 
                 //The delta is equal to the end orientation multiplied by the inverse of the start orientation
                 [  og_ori[0]*inv_curr_q[0] - og_ori[1]*inv_curr_q[1] - og_ori[2]*inv_curr_q[2] - og_ori[3]*inv_curr_q[3],
-                   og_ori[0]*inv_curr_q[1] + og_ori[1]*inv_curr_q[0] + og_ori[2]*inv_curr_q[3] - og_ori[3]*inv_curr_q[2], 
-                   og_ori[0]*inv_curr_q[2] - og_ori[1]*inv_curr_q[3] + og_ori[2]*inv_curr_q[0] + og_ori[3]*inv_curr_q[1],
-                   og_ori[0]*inv_curr_q[3] + og_ori[1]*inv_curr_q[2] - og_ori[2]*inv_curr_q[1] + og_ori[3]*inv_curr_q[0]]
+                   og_ori[0]*inv_curr_q[1] + og_ori[1]*inv_curr_q[0] - og_ori[2]*inv_curr_q[3] + og_ori[3]*inv_curr_q[2], 
+                   og_ori[0]*inv_curr_q[2] + og_ori[1]*inv_curr_q[3] - og_ori[2]*inv_curr_q[0] + og_ori[3]*inv_curr_q[1],
+                   og_ori[0]*inv_curr_q[3] - og_ori[1]*inv_curr_q[2] + og_ori[2]*inv_curr_q[1] + og_ori[3]*inv_curr_q[0]]
 
             };
             
