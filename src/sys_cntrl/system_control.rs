@@ -199,7 +199,7 @@ impl SystemController{
             );
 
             // Rotation that carries calibration orientation -> current orientation
-            let delta_rot: UnitQuaternion<f32> =  q_og * q_curr.inverse();
+            let delta_rot: UnitQuaternion<f32> = q_curr * q_og.inverse();
 
             // Positions in metres
             let og_pos_m = Vector3::new(og_pos[0], og_pos[1], og_pos[2]) / 1000.0;
@@ -212,7 +212,7 @@ impl SystemController{
                 Translation3::from(translation).to_homogeneous() * delta_rot.to_homogeneous();
                 
             //Combine the standard transform and the position based transform            
-            let tmat =    CAM_CALIB_TO_WORLD_TRANSFORM[i] * pos_to_calib_pos;
+            let tmat =    CAM_CALIB_TO_WORLD_TRANSFORM[i] * pos_to_calib_po.try_inverse.unwrap();
 
 
             pcl.transform_with(&tmat);         
