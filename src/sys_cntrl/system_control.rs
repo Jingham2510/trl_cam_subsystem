@@ -190,10 +190,6 @@ impl SystemController{
 
             let og_pos = OG_POS_LIST[i];
             let og_ori = OG_ORI_LIST[i];
-
-            /*
-            //Get the delta position and orientation
-            let delta_pos : [f32;3] = [(self.curr_pos[0] - og_pos[0]) / 1000.0, (self.curr_pos[1] - og_pos[1]) / 1000.0, (self.curr_pos[2] - og_pos[2]) / 1000.0];
             
             //Get the quaternion that rotates to the original calibration orientation
             let delta_ori : [f32;4] = {
@@ -212,21 +208,36 @@ impl SystemController{
             //Split quaternion for readability
             let [q_w, q_i, q_j, q_k] = delta_ori;   
 
-            println!("Norm: {}", (q_w*q_w + q_i*q_i+ q_j*q_j + q_k*q_k).sqrt());
-
 
             //Square the values required
             let q_i_sq = q_i.powi(2);
             let q_j_sq = q_j.powi(2);
             let q_k_sq = q_k.powi(2);
-        
 
-            //Calculate the workspace transform
-            let pos_to_calib_pos = matrix![1.0 - 2.0*(q_j_sq + q_k_sq), 2.0*(q_i*q_j - q_k*q_w), 2.0*(q_i*q_k + q_j*q_w), delta_pos[0];
-                                                                        2.0*(q_i*q_j + q_k*q_w), 1.0 - 2.0*(q_i_sq + q_k_sq), 2.0*(q_j*q_k - q_i*q_w), delta_pos[1];
-                                                                        2.0*(q_i*q_k - q_j*q_w), 2.0*(q_j*q_k + q_i*q_w), 1.0 - 2.0*(q_i_sq + q_j_sq), delta_pos[2];
-                                                                        0.0, 0.0, 0.0, 1.0];
+            //Get the rotation matrix
+            let r00 = 1.0 - 2.0*(q_j_sq + q_k_sq);
+            let r01 = 2.0*(q_i*q_j - q_k*q_w);
+            let r02 = 2.0*(q_i*q_k + q_j*q_w);
+            let r10 = 2.0*(q_i*q_j + q_k*q_w);
+            let r11 = 1.0 - 2.0*(q_i_sq + q_k_sq);
+            let r12 = 2.0*(q_j*q_k - q_i*q_w);
+            let r20 = 2.0*(q_i*q_k - q_j*q_w);
+            let r21 = 2.0*(q_j*q_k + q_i*q_w);
+            let r22 = 1.0 - 2.0*(q_i_sq + q_j_sq);
 
+            // get the position change in metres
+            let og_pos_m = [og_pos[0] / 1000.0, og_pos[1] / 1000.0, og_pos[2] / 1000.0];
+            let curr_pos_m = [self.curr_pos[0] / 1000.0, self.curr_pos[1] / 1000.0, self.curr_pos[2] / 1000.0];
+
+            // Translation = curr_pos - R_delta * og_pos  (accounts for pivot at og_pos)
+            let t0 = curr_pos_m[0] - (r00*og_pos_m[0] + r01*og_pos_m[1] + r02*og_pos_m[2]);
+            let t1 = curr_pos_m[1] - (r10*og_pos_m[0] + r11*og_pos_m[1] + r12*og_pos_m[2]);
+            let t2 = curr_pos_m[2] - (r20*og_pos_m[0] + r21*og_pos_m[1] + r22*og_pos_m[2]);
+
+            let pos_to_calib_pos = matrix![r00, r01, r02, t0;
+                                                                                r10, r11, r12, t1;
+                                                                                r20, r21, r22, t2;
+                                                                                0.0, 0.0, 0.0, 1.0];
         
 
                                                                 
@@ -238,53 +249,8 @@ impl SystemController{
 
             pcl.transform_with(&tmat);
 
-            */
+            
 
-            let delta_ori: [f32; 4] = {
-    let inv_og_q = [og_ori[0], -og_ori[1], -og_ori[2], -og_ori[3]];
-    let a = self.curr_ori[0]; let b = self.curr_ori[1];
-    let c = self.curr_ori[2]; let d = self.curr_ori[3];
-    let e = inv_og_q[0]; let f = inv_og_q[1];
-    let g = inv_og_q[2]; let h = inv_og_q[3];
-
-    [
-        a*e - b*f - c*g - d*h,   // w
-        a*f + b*e + c*h - d*g,   // x
-        a*g - b*h + c*e + d*f,   // y
-        a*h + b*g - c*f + d*e,   // z
-    ]
-};
-
-let [q_w, q_i, q_j, q_k] = delta_ori;
-let q_i_sq = q_i.powi(2);
-let q_j_sq = q_j.powi(2);
-let q_k_sq = q_k.powi(2);
-
-let r00 = 1.0 - 2.0*(q_j_sq + q_k_sq);
-let r01 = 2.0*(q_i*q_j - q_k*q_w);
-let r02 = 2.0*(q_i*q_k + q_j*q_w);
-let r10 = 2.0*(q_i*q_j + q_k*q_w);
-let r11 = 1.0 - 2.0*(q_i_sq + q_k_sq);
-let r12 = 2.0*(q_j*q_k - q_i*q_w);
-let r20 = 2.0*(q_i*q_k - q_j*q_w);
-let r21 = 2.0*(q_j*q_k + q_i*q_w);
-let r22 = 1.0 - 2.0*(q_i_sq + q_j_sq);
-
-// og_pos in meters (matching your /1000.0 convention elsewhere)
-let og_pos_m = [og_pos[0] / 1000.0, og_pos[1] / 1000.0, og_pos[2] / 1000.0];
-let curr_pos_m = [self.curr_pos[0] / 1000.0, self.curr_pos[1] / 1000.0, self.curr_pos[2] / 1000.0];
-
-// Translation = curr_pos - R_delta * og_pos  (accounts for pivot at og_pos)
-let t0 = curr_pos_m[0] - (r00*og_pos_m[0] + r01*og_pos_m[1] + r02*og_pos_m[2]);
-let t1 = curr_pos_m[1] - (r10*og_pos_m[0] + r11*og_pos_m[1] + r12*og_pos_m[2]);
-let t2 = curr_pos_m[2] - (r20*og_pos_m[0] + r21*og_pos_m[1] + r22*og_pos_m[2]);
-
-let pos_to_calib_pos = matrix![r00, r01, r02, t0;
-                                r10, r11, r12, t1;
-                                r20, r21, r22, t2;
-                                0.0, 0.0, 0.0, 1.0];
-
-let tmat = pos_to_calib_pos * CAM_CALIB_TO_WORLD_TRANSFORM[i];
             
 
         }
