@@ -212,7 +212,7 @@ impl SystemController{
                 Translation3::from(translation).to_homogeneous() * delta_rot.to_homogeneous();
                 
             //Combine the standard transform and the position based transform            
-            let current_to_world =    CAM_CALIB_TO_WORLD_TRANSFORM[i].try_inverse().unwrap() * calib_to_pos_trans.try_inverse().unwrap();
+            let current_to_world =    CAM_CALIB_TO_WORLD_TRANSFORM[i] * calib_to_pos_trans.try_inverse().unwrap();
 
 
             pcl.transform_with(&current_to_world);         
