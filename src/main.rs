@@ -245,6 +245,8 @@ fn command_handler(mut config_manager : ConfigManager){
 			                i += 1;
                         }
 
+                        println!("Points captured");
+
                     }
                     Err(e) =>{
                         println!("{e}");

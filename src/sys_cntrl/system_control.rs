@@ -70,10 +70,6 @@ const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![0.01105789,   -0.9529749, 
                                                       -0.005724692,    0.3028008,    0.9530368,   -1.2832978;
                                                       0.0, 0.0, 0.0, 1.0];
 
-const BACK_SPOKE_L_ADJ : Matrix4<f32> = matrix![0.998656, -0.006059, -0.051465, 0.073047;
-                                                0.000000, 0.993142, -0.116917, 0.026633;
-                                                0.051821, 0.116760, 0.991807, -0.188088;
-                                                0.000000, 0.000000, 0.000000, 1.000000];
 
 
 const BACK_SPOKE_R_POS : [f32; 3] = [1033.26, 1724.30, 1316.60];
@@ -87,7 +83,7 @@ const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![0.43745154,   0.7777199, -
 
 const OG_POS_LIST : [[f32;3] ;3] = [FRONT_SPOKE_POS, BACK_SPOKE_L_POS, BACK_SPOKE_R_POS];
 const OG_ORI_LIST : [[f32;4] ;3] = [FRONT_SPOKE_ORI, BACK_SPOKE_L_ORI, BACK_SPOKE_R_ORI];
-const TCP_TRANSFORM_LIST : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM , BACK_SPOKE_L_TRANSFORM , BACK_SPOKE_R_TRANSFORM ];
+const CAM_CALIB_TO_WORLD_TRANSFORM : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM , BACK_SPOKE_L_TRANSFORM , BACK_SPOKE_R_TRANSFORM ];
 
 
 //Default croppings for each camera
@@ -222,7 +218,7 @@ impl SystemController{
         
 
             //Calculate the workspace transform
-            let work_tmat = matrix![1.0 - 2.0*(q_j_sq + q_k_sq), 2.0*(q_i*q_j - q_k*q_w), 2.0*(q_i*q_k + q_j*q_w), delta_pos[0];
+            let pos_to_calib_pos = matrix![1.0 - 2.0*(q_j_sq + q_k_sq), 2.0*(q_i*q_j - q_k*q_w), 2.0*(q_i*q_k + q_j*q_w), delta_pos[0];
                                                                         2.0*(q_i*q_j + q_k*q_w), 1.0 - 2.0*(q_i_sq + q_k_sq), 2.0*(q_j*q_k - q_i*q_w), delta_pos[1];
                                                                         2.0*(q_i*q_k - q_j*q_w), 2.0*(q_j*q_k + q_i*q_w), 1.0 - 2.0*(q_i_sq + q_j_sq), delta_pos[2];
                                                                         0.0, 0.0, 0.0, 1.0];
@@ -230,10 +226,10 @@ impl SystemController{
         
 
                                                                 
-                                                            
+            println!("{}", pos_to_calib_pos);
                 
             //Combine the standard transform and the position based transform            
-            let tmat = work_tmat.try_inverse().unwrap() * TCP_TRANSFORM_LIST[i];
+            let tmat = pos_to_calib_pos.try_inverse().unwrap() * CAM_CALIB_TO_WORLD_TRANSFORM[i];
 
 
             pcl.transform_with(&tmat);
