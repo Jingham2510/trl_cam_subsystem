@@ -211,6 +211,9 @@ impl SystemController{
             //Split quaternion for readability
             let [q_w, q_i, q_j, q_k] = delta_ori;   
 
+            println!("Norm: {}", (q_w*q_w + q_i*q_i+ q_j*q_j + q_k*q_k).sqrt());
+
+
             //Square the values required
             let q_i_sq = q_i.powi(2);
             let q_j_sq = q_j.powi(2);
