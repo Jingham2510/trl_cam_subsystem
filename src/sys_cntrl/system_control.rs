@@ -157,10 +157,10 @@ impl SystemController{
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
 
-        self.curr_pos = BACK_SPOKE_L_POS;
-        self.curr_ori = BACK_SPOKE_L_ORI;
+        self.curr_pos = [1085.80, 1603.64, 875.78];
+        self.curr_ori = [0.02681, 0.17520, -0.98415, 0.00480];
 
-         let mut pcl_vec = self.fire_all_cams()?;
+        let mut pcl_vec = self.fire_all_cams()?;
 
         self.workspace_transform(&mut pcl_vec);
      
@@ -188,7 +188,7 @@ impl SystemController{
             let og_ori = OG_ORI_LIST[i];
 
             //Get the delta position and orientation
-            let delta_pos : [f32;3] = [(og_pos[0] - self.curr_pos[0]) /1000.0, (og_pos[1] - self.curr_pos[1]) /1000.0, (og_pos[2] - self.curr_pos[2]) / 1000.0];
+            let delta_pos : [f32;3] = [(og_pos[0] - self.curr_pos[0]), (og_pos[1] - self.curr_pos[1]), (og_pos[2] - self.curr_pos[2])];
             
             //Get the quaternion that rotates to the original calibration orientation
             let delta_ori : [f32;4] = {
@@ -225,7 +225,7 @@ impl SystemController{
                                                             
                 
             //Combine the standard transform and the position based transform            
-            let tmat = work_tmat.try_inverse().unwrap() * TCP_TRANSFORM_LIST[i];
+            let tmat =   TCP_TRANSFORM_LIST[i] * work_tmat.try_inverse().unwrap();
 
             println!("{}", tmat);
 
