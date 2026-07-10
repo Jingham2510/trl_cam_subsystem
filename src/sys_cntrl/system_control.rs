@@ -177,8 +177,8 @@ impl SystemController{
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
 
-        self.curr_pos = [360.12, 2038.94, 277.57];
-        self.curr_ori = [0.01445, 0.01835, -0.99923, -0.03156];
+        self.curr_pos = [-10.86, 1796.83, 304.97];
+        self.curr_ori = [0.00737, 0.23091, -0.97236, -0.03391];
 
         let mut pcl_vec = self.fire_all_cams()?;
 
