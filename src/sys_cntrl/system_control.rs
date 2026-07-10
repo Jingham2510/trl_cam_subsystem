@@ -79,7 +79,7 @@ const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![0.42973855,   0.7811466,  
 
 
 const OG_POS_LIST : [[f32;3] ;3] = [FRONT_SPOKE_POS, BACK_SPOKE_L_POS, BACK_SPOKE_L_POS];
-const OG_ORI_LIST : [[f32;4] ;3] = [FRONT_SPOKE_ORI, BACK_SPOKE_L_ORI, BACK_SPOKE_L_ORI];
+const OG_ORI_LIST : [[f32;4] ;3] = [FRONT_SPOKE_ORI, BACK_SPOKE_L_ORI, BACK_SPOKE_R_ORI];
 const TCP_TRANSFORM_LIST : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM, BACK_SPOKE_L_TRANSFORM, BACK_SPOKE_R_TRANSFORM];
 
 //Default croppings for each camera
@@ -188,7 +188,7 @@ impl SystemController{
             let og_ori = OG_ORI_LIST[i];
 
             //Get the delta position and orientation
-            let delta_pos : [f32;3] = [(og_pos[0] - self.curr_pos[0]), (og_pos[1] - self.curr_pos[1]), (og_pos[2] - self.curr_pos[2])];
+            let delta_pos : [f32;3] = [(self.curr_pos[0] - og_pos[0]), (self.curr_pos[1] - og_pos[1]), (self.curr_pos[2] - og_pos[2])];
             
             //Get the quaternion that rotates to the original calibration orientation
             let delta_ori : [f32;4] = {
