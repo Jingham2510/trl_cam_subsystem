@@ -9,7 +9,7 @@ use rustgeomapping::data_types::intrinsic_info::IntrinsicInfo;
 use rustgeomapping::computer_vision::get_extrinsic_inv_from_aruco_4x4_250;
 use crate::config::config_manager::ConfigManager;
 use anyhow::bail;
-use nalgebra::{Matrix4, matrix};
+use nalgebra::{UnitQuaternion, Quaternion, Vector3, Matrix4, Translation3, matrix};
 use std::io::{Read, stdin};
 use std::process::exit;
 use std::net::UdpSocket;
@@ -190,66 +190,32 @@ impl SystemController{
 
             let og_pos = OG_POS_LIST[i];
             let og_ori = OG_ORI_LIST[i];
-            
-            //Get the quaternion that rotates to the original calibration orientation
-            let delta_ori : [f32;4] = {
-                //Invert the current orientation
-                let inv_curr_q = [self.curr_ori[0], -self.curr_ori[1], -self.curr_ori[2], -self.curr_ori[3]];
+           // Build unit quaternions directly from w,x,y,z (ABB order)
+            let q_og = UnitQuaternion::from_quaternion(
+                Quaternion::new(og_ori[0], og_ori[1], og_ori[2], og_ori[3])
+            );
+            let q_curr = UnitQuaternion::from_quaternion(
+                Quaternion::new(self.curr_ori[0], self.curr_ori[1], self.curr_ori[2], self.curr_ori[3])
+            );
 
-                //The delta is equal to the end orientation multiplied by the inverse of the start orientation
-                [  og_ori[0]*inv_curr_q[0] - og_ori[1]*inv_curr_q[1] - og_ori[2]*inv_curr_q[2] - og_ori[3]*inv_curr_q[3],
-                   og_ori[0]*inv_curr_q[1] + og_ori[1]*inv_curr_q[0] - og_ori[2]*inv_curr_q[3] + og_ori[3]*inv_curr_q[2], 
-                   og_ori[0]*inv_curr_q[2] + og_ori[1]*inv_curr_q[3] - og_ori[2]*inv_curr_q[0] + og_ori[3]*inv_curr_q[1],
-                   og_ori[0]*inv_curr_q[3] - og_ori[1]*inv_curr_q[2] + og_ori[2]*inv_curr_q[1] + og_ori[3]*inv_curr_q[0]]
+            // Rotation that carries calibration orientation -> current orientation
+            let delta_rot: UnitQuaternion<f32> = q_curr * q_og.inverse();
 
-            };
-            
-            
-            //Split quaternion for readability
-            let [q_w, q_i, q_j, q_k] = delta_ori;   
+            // Positions in metres
+            let og_pos_m = Vector3::new(og_pos[0], og_pos[1], og_pos[2]) / 1000.0;
+            let curr_pos_m = Vector3::new(self.curr_pos[0], self.curr_pos[1], self.curr_pos[2]) / 1000.0;
 
+            // Translation accounting for pivot at og_pos: t = curr_pos - R * og_pos
+            let translation = curr_pos_m - delta_rot * og_pos_m;
 
-            //Square the values required
-            let q_i_sq = q_i.powi(2);
-            let q_j_sq = q_j.powi(2);
-            let q_k_sq = q_k.powi(2);
-
-            //Get the rotation matrix
-            let r00 = 1.0 - 2.0*(q_j_sq + q_k_sq);
-            let r01 = 2.0*(q_i*q_j - q_k*q_w);
-            let r02 = 2.0*(q_i*q_k + q_j*q_w);
-            let r10 = 2.0*(q_i*q_j + q_k*q_w);
-            let r11 = 1.0 - 2.0*(q_i_sq + q_k_sq);
-            let r12 = 2.0*(q_j*q_k - q_i*q_w);
-            let r20 = 2.0*(q_i*q_k - q_j*q_w);
-            let r21 = 2.0*(q_j*q_k + q_i*q_w);
-            let r22 = 1.0 - 2.0*(q_i_sq + q_j_sq);
-
-            // get the position change in metres
-            let og_pos_m = [og_pos[0] / 1000.0, og_pos[1] / 1000.0, og_pos[2] / 1000.0];
-            let curr_pos_m = [self.curr_pos[0] / 1000.0, self.curr_pos[1] / 1000.0, self.curr_pos[2] / 1000.0];
-
-            // Translation = curr_pos - R_delta * og_pos  (accounts for pivot at og_pos)
-            let t0 = curr_pos_m[0] - (r00*og_pos_m[0] + r01*og_pos_m[1] + r02*og_pos_m[2]);
-            let t1 = curr_pos_m[1] - (r10*og_pos_m[0] + r11*og_pos_m[1] + r12*og_pos_m[2]);
-            let t2 = curr_pos_m[2] - (r20*og_pos_m[0] + r21*og_pos_m[1] + r22*og_pos_m[2]);
-
-            let pos_to_calib_pos = matrix![r00, r01, r02, t0;
-                                                                                r10, r11, r12, t1;
-                                                                                r20, r21, r22, t2;
-                                                                                0.0, 0.0, 0.0, 1.0];
-        
-
-                                                                
-            println!("{}", pos_to_calib_pos);
+            let pos_to_calib_pos: Matrix4<f32> =
+                Translation3::from(translation).to_homogeneous() * delta_rot.to_homogeneous();
                 
             //Combine the standard transform and the position based transform            
-            let tmat =   CAM_CALIB_TO_WORLD_TRANSFORM[i] * pos_to_calib_pos;
+            let tmat =    CAM_CALIB_TO_WORLD_TRANSFORM[i] * pos_to_calib_pos;
 
 
-            pcl.transform_with(&tmat);
-
-            
+            pcl.transform_with(&tmat);         
 
             
 
