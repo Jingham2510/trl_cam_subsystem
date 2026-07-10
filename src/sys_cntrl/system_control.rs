@@ -72,6 +72,7 @@ const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![0.01105789,   -0.9529749, 
 
 
 //const BACK_SPOKE_R_POS : [f32; 3] = [1033.26, 1724.30, 1316.60];
+//Hand tuned corrections
 const BACK_SPOKE_R_POS : [f32; 3] = [1033.26 - 1129.9, 1724.30 - 37.1, 1316.60];
 const BACK_SPOKE_R_ORI : [f32; 4] = [0.02676, 0.17529, -0.98414, 0.00474];
 const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![0.43745154,   0.7777199, -0.45142877,   1.3026029;
@@ -159,8 +160,8 @@ impl SystemController{
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
 
-        self.curr_pos = [711.85, 1919.60, 718.48];
-        self.curr_ori = [0.02680, 0.17524, -0.98415, 0.00478];
+        self.curr_pos = [468.75, 2216.71, 361.66];
+        self.curr_ori = [0.00938, 0.17355, -0.98421, -0.03339];
 
         let mut pcl_vec = self.fire_all_cams()?;
 
