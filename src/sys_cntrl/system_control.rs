@@ -201,9 +201,9 @@ impl SystemController{
 
                 //The delta is equal to the end orientation multiplied by the inverse of the start orientation
                 [  og_ori[0]*inv_curr_q[0] - og_ori[1]*inv_curr_q[1] - og_ori[2]*inv_curr_q[2] - og_ori[3]*inv_curr_q[3],
-                   og_ori[0]*inv_curr_q[1] + og_ori[1]*inv_curr_q[0] - og_ori[2]*inv_curr_q[3] + og_ori[3]*inv_curr_q[2], 
-                   og_ori[0]*inv_curr_q[2] + og_ori[1]*inv_curr_q[3] + og_ori[2]*inv_curr_q[0] - og_ori[3]*inv_curr_q[1],
-                   og_ori[0]*inv_curr_q[3] - og_ori[1]*inv_curr_q[2] + og_ori[2]*inv_curr_q[1] + og_ori[3]*inv_curr_q[0]]
+                   og_ori[0]*inv_curr_q[1] + og_ori[1]*inv_curr_q[0] + og_ori[2]*inv_curr_q[3] + og_ori[3]*inv_curr_q[2], 
+                   og_ori[0]*inv_curr_q[2] - og_ori[1]*inv_curr_q[3] + og_ori[2]*inv_curr_q[0] + og_ori[3]*inv_curr_q[1],
+                   og_ori[0]*inv_curr_q[3] + og_ori[1]*inv_curr_q[2] - og_ori[2]*inv_curr_q[1] + og_ori[3]*inv_curr_q[0]]
 
             };
             
@@ -229,7 +229,7 @@ impl SystemController{
             println!("{}", pos_to_calib_pos);
                 
             //Combine the standard transform and the position based transform            
-            let tmat = pos_to_calib_pos.try_inverse().unwrap() * CAM_CALIB_TO_WORLD_TRANSFORM[i];
+            let tmat =   pos_to_calib_pos.try_inverse().unwrap() * CAM_CALIB_TO_WORLD_TRANSFORM[i];
 
 
             pcl.transform_with(&tmat);
