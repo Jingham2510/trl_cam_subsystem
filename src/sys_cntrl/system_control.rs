@@ -52,7 +52,7 @@ const GLOBAL_HMAP_HEIGHT : usize = (GLOBAL_AREA_HEIGHT / HMAP_RES) as usize;
 
 
 
-//Transformation from cam to sandbed (with relavent robot position/orientation)
+//CALIB POS TO WORLD TRANSFORM -----------------
 
 const FRONT_SPOKE_POS : [f32; 3] = [417.67, 2536.85, 1075.80];
 const FRONT_SPOKE_ORI : [f32; 4] = [0.00130, -0.11326, 0.99354, 0.00640];
@@ -60,6 +60,8 @@ const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![0.9977538, -0.031512104, -0
                                                     0.05408039,    0.8996666,   0.43321505,    -0.258076;
                                                     0.03953024,   -0.4354388,      0.89935,   -1.2794335;
                                                     0.0,          0.0,          0.0,          1.    ];
+
+
 
 
 
@@ -73,8 +75,6 @@ const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![0.01105789,   -0.9529749, 
 
 
 const BACK_SPOKE_R_POS : [f32; 3] = [1033.26, 1724.30, 1316.60];
-//Hand tuned corrections
-//const BACK_SPOKE_R_POS : [f32; 3] = [1033.26 - 1129.9, 1724.30 - 37.1, 1316.60];
 const BACK_SPOKE_R_ORI : [f32; 4] = [0.02676, 0.17529, -0.98414, 0.00474];
 const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![0.43745154,   0.7777199, -0.45142877,   1.3026029;
                                                 -0.89837676,  0.39998746, -0.18146408,    1.017233 ;
@@ -83,7 +83,39 @@ const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![0.43745154,   0.7777199, -
 
 const OG_POS_LIST : [[f32;3] ;3] = [FRONT_SPOKE_POS, BACK_SPOKE_L_POS, BACK_SPOKE_R_POS];
 const OG_ORI_LIST : [[f32;4] ;3] = [FRONT_SPOKE_ORI, BACK_SPOKE_L_ORI, BACK_SPOKE_R_ORI];
-const CAM_CALIB_TO_WORLD_TRANSFORM : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM , BACK_SPOKE_L_TRANSFORM , BACK_SPOKE_R_TRANSFORM ];
+const CALIB_TCP_TO_WORLD_TRANSFORM : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM , BACK_SPOKE_L_TRANSFORM , BACK_SPOKE_R_TRANSFORM];
+
+
+
+///FORCE SENSOR TO CAMERA TRANSFORMS
+
+const FRONT_CAM_TO_FORCE : Matrix4<f32> = matrix![-1.0, 0.0, 0.0, 0.0;
+                                                  0.0, -0.9396926, -0.3420202, 0.2625;
+                                                  0.0, -0.3420202, 0.9396926, 0.1685;
+                                                  0.0, 0.0, 0.0, 1.0];
+
+
+const BL_CAM_TO_FORCE: Matrix4<f32> = matrix![0.5000000,  0.8660254,  0.0000000, 0.0005;
+                                                -0.8137977,  0.4698463, -0.3420202, 0.2622;
+                                                -0.2961981,  0.1710101,  0.9396926, 0.1685;
+                                                0.0, 0.0, 0.0, 1.0];
+
+
+
+const BR_CAM_TO_FORCE : Matrix4<f32> = matrix![0.5000000, -0.8660254,  0.0000000, 0.5;
+                                               0.8137977,  0.4698463, -0.3420202, 262.8;
+                                               0.2961981,  0.1710101,  0.9396926, 168.5;
+                                               0.0, 0.0, 0.0, 1.0];
+
+const CAM_TO_FORCE :[Matrix4<f32>; 3] = [FRONT_CAM_TO_FORCE, BL_CAM_TO_FORCE, BR_CAM_TO_FORCE];
+
+
+///TCP POINT TO FORCE SENSOR POINT TRANSFORM
+const FORCE_TO_SPHERE_TCP_TRANSFORM : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
+                                                            0.0, 1.0, 0.0, 0.0;
+                                                            0.0, 0.0, 1.0, 0.35;
+                                                            0.0, 0.0, 0.0, 1.0];
+
 
 
 //Default croppings for each camera
@@ -212,7 +244,7 @@ impl SystemController{
                 Translation3::from(translation).to_homogeneous() * delta_rot.to_homogeneous();
                 
             //Combine the standard transform and the position based transform            
-            let current_to_world =    CAM_CALIB_TO_WORLD_TRANSFORM[i] * calib_to_pos_trans.try_inverse().unwrap();
+            let current_to_world =    CALIB_TCP_TO_WORLD_TRANSFORM[i] * calib_to_pos_trans.try_inverse().unwrap() * FORCE_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
 
 
             pcl.transform_with(&current_to_world);         
