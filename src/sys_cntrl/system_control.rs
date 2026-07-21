@@ -248,7 +248,7 @@ impl SystemController{
 
             //ORDER: Sensor frame (in current TCP frame) -> Force sensor frame (in current TCP frame) -> current TCP frame -> calibration frame -> world frame           
 
-            let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i]  * cam_calib_to_current_cam.try_inverse().unwrap() ;
+            let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i]  * cam_calib_to_current_cam * CAM_TO_FORCE[i] ;
 
 
 
