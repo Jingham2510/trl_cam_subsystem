@@ -244,7 +244,7 @@ impl SystemController{
                 Translation3::from(translation).to_homogeneous() * delta_rot.to_homogeneous();
                 
             //Combine the standard transform and the position based transform            
-            let current_to_world =    CALIB_TCP_TO_WORLD_TRANSFORM[i] * calib_to_pos_trans.try_inverse().unwrap() * FORCE_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
+            let current_to_world =   calib_to_pos_trans * CALIB_TCP_TO_WORLD_TRANSFORM[i]  * FORCE_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
 
 
             pcl.transform_with(&current_to_world);         
