@@ -113,7 +113,7 @@ const CAM_TO_FORCE :[Matrix4<f32>; 3] = [FRONT_CAM_TO_FORCE, BL_CAM_TO_FORCE, BR
 ///TCP POINT TO FORCE SENSOR POINT TRANSFORM - DEFINED IN THE CURRENT TCP FRAME
 const FORCE_TO_SPHERE_TCP_TRANSFORM : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
                                                             0.0, 1.0, 0.0, 0.0;
-                                                            0.0, 0.0, 1.0, -0.35;
+                                                            0.0, 0.0, 1.0, 0.35;
                                                             0.0, 0.0, 0.0, 1.0];
 
 
