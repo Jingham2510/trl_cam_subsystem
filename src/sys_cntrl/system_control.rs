@@ -110,7 +110,7 @@ const CAM_TO_FORCE :[Matrix4<f32>; 3] = [FRONT_CAM_TO_FORCE, BL_CAM_TO_FORCE, BR
 
 
 ///TCP POINT TO FORCE SENSOR POINT TRANSFORM - DEFINED IN THE CURRENT TCP FRAME
-const FORCE_TO_SPHERE_TCP_TRANSFORM : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
+const LOAD_CELL_TO_SPHERE_TCP_TRANSFORM : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
                                                             0.0, 1.0, 0.0, 0.0;
                                                             0.0, 0.0, 1.0, -0.35;
                                                             0.0, 0.0, 0.0, 1.0];
@@ -233,24 +233,22 @@ impl SystemController{
             let og_pos_m = Vector3::new(og_pos[0], og_pos[1], og_pos[2]) / 1000.0;
             let curr_pos_m = Vector3::new(self.curr_pos[0], self.curr_pos[1], self.curr_pos[2]) / 1000.0;
 
-                    // TCP pose at calibration time, in base frame
-            let tcp_at_og: Matrix4<f32> =
-                Translation3::from(og_pos_m).to_homogeneous() * q_og.to_homogeneous();
+            // cam pose at calibration time, in base frame
+            let cam_at_og: Matrix4<f32> =
+                (Translation3::from(og_pos_m).to_homogeneous() * q_og.to_homogeneous()) *  LOAD_CELL_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
 
-            // TCP pose right now, in base frame
-            let tcp_at_curr: Matrix4<f32> =
-                Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous();
+            // cam pose atm, in base frame
+            let cam_at_curr: Matrix4<f32> =
+                (Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous()) *  LOAD_CELL_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
 
             // Motion from og pose to curr pose, expressed in base frame
-            let tcp_calib_to_current_tcp = tcp_at_og.try_inverse().unwrap() * tcp_at_curr;
+            let cam_calib_to_current_cam = cam_at_og.try_inverse().unwrap() * cam_at_curr;
                 
             //Combine the standard transform and the position based transform     
 
-            //ORDER: Sensor frame (in current TCP frame) -> Force sensor frame (in current TCP frame) -> current TCP frame -> calibration frame -> world frame
+            //ORDER: Sensor frame (in current TCP frame) -> Force sensor frame (in current TCP frame) -> current TCP frame -> calibration frame -> world frame           
 
-            
-
-            let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i]  * tcp_calib_to_current_tcp.try_inverse().unwrap() *  FORCE_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
+            let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i]  * cam_calib_to_current_cam.try_inverse().unwrap() ;
 
 
 
