@@ -9,7 +9,7 @@ use rustgeomapping::data_types::intrinsic_info::IntrinsicInfo;
 use rustgeomapping::computer_vision::get_extrinsic_inv_from_aruco_4x4_250;
 use crate::config::config_manager::ConfigManager;
 use anyhow::bail;
-use nalgebra::{UnitQuaternion, Quaternion, Vector3, Matrix4, Translation3, matrix, Point3};
+use nalgebra::{UnitQuaternion, Quaternion, Vector3, Matrix4, Translation3, matrix};
 use std::io::{Read, stdin};
 use std::process::exit;
 use std::net::UdpSocket;
@@ -253,12 +253,6 @@ impl SystemController{
 
             let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i]  * tcp_calib_to_current_tcp.try_inverse().unwrap() *  FORCE_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
 
-            let p = Point3::origin();
-
-            println!("{:?}", CAM_TO_FORCE[i] * p);
-            println!("{:?}", FORCE_TO_SPHERE_TCP_TRANSFORM * p);
-            println!("{:?}", sensor_to_world * p);
-            
 
 
             pcl.transform_with(&sensor_to_world);         
