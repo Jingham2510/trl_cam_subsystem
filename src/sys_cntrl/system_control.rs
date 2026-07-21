@@ -56,9 +56,9 @@ const GLOBAL_HMAP_HEIGHT : usize = (GLOBAL_AREA_HEIGHT / HMAP_RES) as usize;
 
 const FRONT_SPOKE_POS : [f32; 3] = [417.67, 2536.85, 1075.80];
 const FRONT_SPOKE_ORI : [f32; 4] = [0.00130, -0.11326, 0.99354, 0.00640];
-const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![0.9977538, -0.031512104, -0.059112735,   0.41898492;
-                                                    0.05408039,    0.8996666,   0.43321505,    -0.258076;
-                                                    0.03953024,   -0.4354388,      0.89935,   -1.2794335;
+const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![0.9977538, -0.031512104, -0.059112735,   0.41898492 ;
+                                                    0.05408039,    0.8996666,   0.43321505,    -0.258076 + -0.30414;
+                                                    0.03953024,   -0.4354388,      0.89935,   -1.2794335 - 0.6813 + 0.35;
                                                     0.0,          0.0,          0.0,          1.    ];
 
 
@@ -87,7 +87,7 @@ const CALIB_FRAME_TO_WORLD_TRANSFORM : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFOR
 
 
 
-///FORCE SENSOR TO CAMERA TRANSFORMS - NEED RECALCING
+///FORCE SENSOR TO CAMERA TRANSFORMS - DEFINED IN THE CURRENT TCP FRAME 
 
 const FRONT_CAM_TO_FORCE : Matrix4<f32> = matrix![1.0000000,  0.0000000,  0.0000000, 0.0;
                                                 0.0000000, 1.0,  0.0, -0.30414;
@@ -110,7 +110,7 @@ const BR_CAM_TO_FORCE : Matrix4<f32> = matrix![1.0000000,  0.0000000,  0.0000000
 const CAM_TO_FORCE :[Matrix4<f32>; 3] = [FRONT_CAM_TO_FORCE, BL_CAM_TO_FORCE, BR_CAM_TO_FORCE];
 
 
-///TCP POINT TO FORCE SENSOR POINT TRANSFORM
+///TCP POINT TO FORCE SENSOR POINT TRANSFORM - DEFINED IN THE CURRENT TCP FRAME
 const FORCE_TO_SPHERE_TCP_TRANSFORM : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
                                                             0.0, 1.0, 0.0, 0.0;
                                                             0.0, 0.0, 1.0, -0.35;
@@ -245,7 +245,10 @@ impl SystemController{
             // Motion from og pose to curr pose, expressed in base frame
             let calib_to_pos_trans = tcp_at_og.try_inverse().unwrap() * tcp_at_curr;
                 
-            //Combine the standard transform and the position based transform            
+            //Combine the standard transform and the position based transform     
+
+            //ORDER: Sensor frame (in current TCP frame) -> Force sensor frame (in current TCP frame) -> current TCP frame -> calibration frame -> world frame
+
             let current_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i] * calib_to_pos_trans.try_inverse().unwrap()  * FORCE_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
 
 
