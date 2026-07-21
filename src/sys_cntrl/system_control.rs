@@ -9,7 +9,7 @@ use rustgeomapping::data_types::intrinsic_info::IntrinsicInfo;
 use rustgeomapping::computer_vision::get_extrinsic_inv_from_aruco_4x4_250;
 use crate::config::config_manager::ConfigManager;
 use anyhow::bail;
-use nalgebra::{UnitQuaternion, Quaternion, Vector3, Matrix4, Translation3, matrix};
+use nalgebra::{UnitQuaternion, Quaternion, Vector3, Matrix4, Translation3, matrix, Point3};
 use std::io::{Read, stdin};
 use std::process::exit;
 use std::net::UdpSocket;
