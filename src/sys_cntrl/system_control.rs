@@ -90,21 +90,21 @@ const CALIB_FRAME_TO_WORLD_TRANSFORM : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFOR
 ///FORCE SENSOR TO CAMERA TRANSFORMS - DEFINED IN THE CURRENT TCP FRAME 
 
 const FRONT_CAM_TO_FORCE : Matrix4<f32> = matrix![1.0000000,  0.0000000,  0.0000000, 0.0;
-                                                0.0000000, 1.0,  0.0, -0.30414;
-                                                0.0000000, 0.0, 1.0, 0.06813;
+                                                0.0000000,  0.4871877, -0.8732973, -0.30414;
+                                                0.0000000,  0.8732973,  0.4871877, -0.06813;
                                                 0.0, 0.0, 0.0, 1.0];
 
 
-const BL_CAM_TO_FORCE: Matrix4<f32> = matrix![1.0000000,  0.0000000,  0.0000000, 0.26381;
-                                            0.0, 1.0, 0.0, 0.15275;
-                                            0.0, 0.0, 1.0, -0.06813;
+const BL_CAM_TO_FORCE: Matrix4<f32> = matrix![-0.9524130, -0.3048106,  0.0000000, 0.26381;
+                                            -0.2973822,  0.9292020,  0.2194253, 0.15275;
+                                            -0.0668831,  0.2089835, -0.9756293, -0.06813;
                                             0.0, 0.0, 0.0, 1.0];
 
 
 
-const BR_CAM_TO_FORCE : Matrix4<f32> = matrix![1.0000000,  0.0000000,  0.0000000, -0.26377;
-                                                0.0, 1.0, 0.0, 0.15278;
-                                                0.0, 0.0, 1.0, -0.06813;
+const BR_CAM_TO_FORCE : Matrix4<f32> = matrix![-0.9524130,  0.3048106,  0.0000000, -0.26377;
+                                                0.2973822,  0.9292020,  0.2194253, 0.15278;
+                                                0.0668831,  0.2089835, -0.9756293, -0.06813;
                                                 0.0, 0.0, 0.0, 1.0];
 
 const CAM_TO_FORCE :[Matrix4<f32>; 3] = [FRONT_CAM_TO_FORCE, BL_CAM_TO_FORCE, BR_CAM_TO_FORCE];
