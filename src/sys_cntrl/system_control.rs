@@ -54,7 +54,7 @@ const GLOBAL_HMAP_HEIGHT : usize = (GLOBAL_AREA_HEIGHT / HMAP_RES) as usize;
 
 //CALIB POS TO WORLD TRANSFORM -----------------
 
-const FRONT_SPOKE_POS : [f32; 3] = [417.67, 2536.85 - 304.14, 1075.80 + 68.13 - 35.0];
+const FRONT_SPOKE_POS : [f32; 3] = [417.67, 2536.85, 1075.80];
 const FRONT_SPOKE_ORI : [f32; 4] = [0.00130, -0.11326, 0.99354, 0.00640];
 const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![0.9977538, -0.031512104, -0.059112735,   0.41898492 ;
                                                     0.05408039,    0.8996666,   0.43321505,    -0.258076;
@@ -249,7 +249,7 @@ impl SystemController{
 
             //ORDER: Sensor frame (in current TCP frame) -> Force sensor frame (in current TCP frame) -> current TCP frame -> calibration frame -> world frame
 
-            let current_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i] * calib_to_pos_trans.try_inverse().unwrap()  * FORCE_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
+            let current_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i] * FORCE_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i] * calib_to_pos_trans.try_inverse().unwrap();
 
 
             pcl.transform_with(&current_to_world);         
