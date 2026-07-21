@@ -234,21 +234,21 @@ impl SystemController{
             let curr_pos_m = Vector3::new(self.curr_pos[0], self.curr_pos[1], self.curr_pos[2]) / 1000.0;
 
             // cam pose at calibration time, in base frame
-            let cam_at_og: Matrix4<f32> =
-                (Translation3::from(og_pos_m).to_homogeneous() * q_og.to_homogeneous()) *  LOAD_CELL_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i].try_inverse().unwrap();
+            let cam_at_calib: Matrix4<f32> =
+                (Translation3::from(og_pos_m).to_homogeneous() * q_og.to_homogeneous()) *  LOAD_CELL_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
 
             // cam pose atm, in base frame
             let cam_at_curr: Matrix4<f32> =
-                (Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous()) *  LOAD_CELL_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i].try_inverse().unwrap();
+                (Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous()) *  LOAD_CELL_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
 
             // Motion from og pose to curr pose, expressed in base frame
-            let cam_calib_to_current_cam = cam_at_og.try_inverse().unwrap() * cam_at_curr;
+            let cam_curr_to_cam_calib =  cam_at_curr * cam_at_calib.try_inverse().unwrap();
                 
             //Combine the standard transform and the position based transform     
 
             //ORDER: Sensor frame (in current TCP frame) -> Force sensor frame (in current TCP frame) -> current TCP frame -> calibration frame -> world frame           
 
-            let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i]  * cam_calib_to_current_cam * CAM_TO_FORCE[i] ;
+            let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i]  * cam_curr_to_cam_calib;
 
 
 
