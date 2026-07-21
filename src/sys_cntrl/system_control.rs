@@ -243,16 +243,25 @@ impl SystemController{
                 Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous();
 
             // Motion from og pose to curr pose, expressed in base frame
-            let calib_to_pos_trans = tcp_at_og.try_inverse().unwrap() * tcp_at_curr;
+            let tcp_calib_to_current_tcp = tcp_at_og.try_inverse().unwrap() * tcp_at_curr;
                 
             //Combine the standard transform and the position based transform     
 
             //ORDER: Sensor frame (in current TCP frame) -> Force sensor frame (in current TCP frame) -> current TCP frame -> calibration frame -> world frame
 
-            let current_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i] * FORCE_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i] * calib_to_pos_trans.try_inverse().unwrap();
+            
+
+            let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i]  * tcp_calib_to_current_tcp.try_inverse().unwrap() *  FORCE_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
+
+            let p = Point3::origin();
+
+            println!("{:?}", CAM_TO_FORCE[i] * p);
+            println!("{:?}", FORCE_TO_SPHERE_TCP_TRANSFORM * p);
+            println!("{:?}", sensor_to_world * p);
+            
 
 
-            pcl.transform_with(&current_to_world);         
+            pcl.transform_with(&sensor_to_world);         
 
             
 
