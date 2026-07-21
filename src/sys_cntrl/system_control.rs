@@ -230,21 +230,23 @@ impl SystemController{
                 Quaternion::new(self.curr_ori[0], self.curr_ori[1], self.curr_ori[2], self.curr_ori[3])
             );
 
-            // Rotation that carries calibration orientation -> current orientation
-            let delta_rot: UnitQuaternion<f32> = q_curr * q_og.inverse();
-
             // Positions in metres
             let og_pos_m = Vector3::new(og_pos[0], og_pos[1], og_pos[2]) / 1000.0;
             let curr_pos_m = Vector3::new(self.curr_pos[0], self.curr_pos[1], self.curr_pos[2]) / 1000.0;
 
-            // Translation accounting for pivot at og_pos: t = curr_pos - R * og_pos
-            let translation = curr_pos_m - delta_rot * og_pos_m;
+                    // TCP pose at calibration time, in base frame
+            let tcp_at_og: Matrix4<f32> =
+                Translation3::from(og_pos_m).to_homogeneous() * q_og.to_homogeneous();
 
-            let calib_to_pos_trans: Matrix4<f32> =
-                Translation3::from(translation).to_homogeneous() * delta_rot.to_homogeneous();
+            // TCP pose right now, in base frame
+            let tcp_at_curr: Matrix4<f32> =
+                Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous();
+
+            // Motion from og pose to curr pose, expressed in base frame
+            let calib_to_pos_trans = tcp_at_og.try_inverse().unwrap() * tcp_at_curr;
                 
             //Combine the standard transform and the position based transform            
-            let current_to_world =   calib_to_pos_trans * CALIB_TCP_TO_WORLD_TRANSFORM[i]  * FORCE_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
+            let current_to_world =   CALIB_TCP_TO_WORLD_TRANSFORM[i] * calib_to_pos_trans  * FORCE_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
 
 
             pcl.transform_with(&current_to_world);         
