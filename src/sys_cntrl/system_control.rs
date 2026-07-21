@@ -83,7 +83,7 @@ const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![0.43745154,   0.7777199, -
 
 const OG_POS_LIST : [[f32;3] ;3] = [FRONT_SPOKE_POS, BACK_SPOKE_L_POS, BACK_SPOKE_R_POS];
 const OG_ORI_LIST : [[f32;4] ;3] = [FRONT_SPOKE_ORI, BACK_SPOKE_L_ORI, BACK_SPOKE_R_ORI];
-const CALIB_TCP_TO_WORLD_TRANSFORM : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM , BACK_SPOKE_L_TRANSFORM , BACK_SPOKE_R_TRANSFORM];
+const CALIB_FRAME_TO_WORLD_TRANSFORM : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM , BACK_SPOKE_L_TRANSFORM , BACK_SPOKE_R_TRANSFORM];
 
 
 
@@ -246,7 +246,7 @@ impl SystemController{
             let calib_to_pos_trans = tcp_at_og.try_inverse().unwrap() * tcp_at_curr;
                 
             //Combine the standard transform and the position based transform            
-            let current_to_world =   CALIB_TCP_TO_WORLD_TRANSFORM[i] * calib_to_pos_trans  * FORCE_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
+            let current_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i] * calib_to_pos_trans.try_inverse().unwrap()  * FORCE_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
 
 
             pcl.transform_with(&current_to_world);         
