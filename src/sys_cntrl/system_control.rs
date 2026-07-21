@@ -54,7 +54,7 @@ const GLOBAL_HMAP_HEIGHT : usize = (GLOBAL_AREA_HEIGHT / HMAP_RES) as usize;
 
 //CALIB POS TO WORLD TRANSFORM -----------------
 
-const FRONT_SPOKE_POS : [f32; 3] = [417.67, 2536.85 - 0.30414, 1075.80 + 0.6813 - 0.35];
+const FRONT_SPOKE_POS : [f32; 3] = [417.67, 2536.85 + 0.30414, 1075.80 - 0.6813 + 0.35];
 const FRONT_SPOKE_ORI : [f32; 4] = [0.00130, -0.11326, 0.99354, 0.00640];
 const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![0.9977538, -0.031512104, -0.059112735,   0.41898492 ;
                                                     0.05408039,    0.8996666,   0.43321505,    -0.258076;
