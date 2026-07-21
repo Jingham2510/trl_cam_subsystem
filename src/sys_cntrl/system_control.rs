@@ -90,21 +90,21 @@ const CALIB_TCP_TO_WORLD_TRANSFORM : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM 
 ///FORCE SENSOR TO CAMERA TRANSFORMS - NEED RECALCING
 
 const FRONT_CAM_TO_FORCE : Matrix4<f32> = matrix![1.0000000,  0.0000000,  0.0000000, 0.0;
-                                                0.0000000, -0.9396926,  0.3420202, 0.262496;
-                                                0.0000000, -0.3420202, -0.9396926, 0.168043;
+                                                0.0000000, 1.0,  0.0, 0.262496;
+                                                0.0000000, 0.0, 1.0, 0.168043;
                                                 0.0, 0.0, 0.0, 1.0];
 
 
-const BL_CAM_TO_FORCE: Matrix4<f32> = matrix![0.5000000, -0.8660254,  0.0000000, -0.00020;
-                                            -0.8137977, -0.4698463, -0.3420202, -0.26300;
-                                            0.2961981,  0.1710101, -0.9396926, 0.16810;
+const BL_CAM_TO_FORCE: Matrix4<f32> = matrix![1.0000000,  0.0000000,  0.0000000, -0.00020;
+                                            0.0, 1.0, 0.0, -0.26300;
+                                            0.0, 0.0, 1.0, 0.16810;
                                             0.0, 0.0, 0.0, 1.0];
 
 
 
-const BR_CAM_TO_FORCE : Matrix4<f32> = matrix![0.5000000,  0.8660254,  0.0000000, 0.0002;
-                                                0.8137977, -0.4698463, -0.3420202, -0.2630;
-                                                -0.2961981,  0.1710101, -0.9396926, 0.16810;
+const BR_CAM_TO_FORCE : Matrix4<f32> = matrix![1.0000000,  0.0000000,  0.0000000, 0.0002;
+                                                0.0, 1.0, 0.0, -0.2630;
+                                                0.0, 0.0, 1.0, 0.16810;
                                                 0.0, 0.0, 0.0, 1.0];
 
 const CAM_TO_FORCE :[Matrix4<f32>; 3] = [FRONT_CAM_TO_FORCE, BL_CAM_TO_FORCE, BR_CAM_TO_FORCE];
@@ -244,7 +244,7 @@ impl SystemController{
                 Translation3::from(translation).to_homogeneous() * delta_rot.to_homogeneous();
                 
             //Combine the standard transform and the position based transform            
-            let current_to_world =    CALIB_TCP_TO_WORLD_TRANSFORM[i] * calib_to_pos_trans.try_inverse().unwrap() * FORCE_TO_SPHERE_TCP_TRANSFORM;// * CAM_TO_FORCE[i];
+            let current_to_world =    CALIB_TCP_TO_WORLD_TRANSFORM[i] * calib_to_pos_trans.try_inverse().unwrap() * FORCE_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
 
 
             pcl.transform_with(&current_to_world);         
