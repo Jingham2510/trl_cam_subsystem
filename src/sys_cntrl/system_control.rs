@@ -235,11 +235,11 @@ impl SystemController{
 
             // cam pose at calibration time, in base frame
             let cam_at_og: Matrix4<f32> =
-                (Translation3::from(og_pos_m).to_homogeneous() * q_og.to_homogeneous()) *  LOAD_CELL_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
+                (Translation3::from(og_pos_m).to_homogeneous() * q_og.to_homogeneous()) *  LOAD_CELL_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i].try_inverse().unwrap();
 
             // cam pose atm, in base frame
             let cam_at_curr: Matrix4<f32> =
-                (Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous()) *  LOAD_CELL_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i];
+                (Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous()) *  LOAD_CELL_TO_SPHERE_TCP_TRANSFORM * CAM_TO_FORCE[i].try_inverse().unwrap();
 
             // Motion from og pose to curr pose, expressed in base frame
             let cam_calib_to_current_cam = cam_at_og.try_inverse().unwrap() * cam_at_curr;
