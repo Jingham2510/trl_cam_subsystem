@@ -87,25 +87,27 @@ const CALIB_FRAME_TO_WORLD_TRANSFORM : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFOR
 
 
 
-///FORCE SENSOR TO CAMERA TRANSFORMS - DEFINED IN THE CAMERA FRAME
+///FORCE SENSOR TO CAMERA TRANSFORMS - DEFINED IN THE CAMERA FRAME - redo translations
 
-const FRONT_CAM_TO_FORCE : Matrix4<f32> = matrix![1.0000000,  0.0000000,  0.0000000, 0.0;
-                                                0.0000000, -0.9396926,  0.3420202, 0.262496;
-                                                0.0000000, -0.3420202, -0.9396926, 0.168043;
+const FRONT_CAM_TO_FORCE : Matrix4<f32> = matrix![1.0,  0.0,  0.0, 0.0;
+                                                0.0, 1.0,  0.0, 0.262496;
+                                                0.0, 0.0, 1.0, 0.168043;
                                                 0.0, 0.0, 0.0, 1.0];
 
 
-const BL_CAM_TO_FORCE: Matrix4<f32> = matrix![0.5000000, -0.8660254,  0.0000000, -0.00020;
-                                            -0.8137977, -0.4698463, -0.3420202, -0.26300;
-                                            0.2961981,  0.1710101, -0.9396926, 0.16810;
+const BL_CAM_TO_FORCE: Matrix4<f32> = matrix![1.0000000,  0.0,  0.0, -0.00020;
+                                            0.0, 1.0,  0.0, -0.26300;
+                                            0.0, 0.0, 1.0, 0.16810;
                                             0.0, 0.0, 0.0, 1.0];
 
 
 
-const BR_CAM_TO_FORCE : Matrix4<f32> = matrix![0.5000000,  0.8660254,  0.0000000, 0.0002;
-                                                0.8137977, -0.4698463, -0.3420202, -0.2630;
-                                                -0.2961981,  0.1710101, -0.9396926, 0.16810;
+const BR_CAM_TO_FORCE : Matrix4<f32> = matrix![1.0,  0.0,  0.0, 0.0002;
+                                                0.0, 1.0,  0.0, -0.2630;
+                                                0.0, 0.0, 1.0, 0.16810;
                                                 0.0, 0.0, 0.0, 1.0];
+
+
 const CAM_TO_LOAD_CELL :[Matrix4<f32>; 3] = [FRONT_CAM_TO_FORCE, BL_CAM_TO_FORCE, BR_CAM_TO_FORCE];
 
 
@@ -192,8 +194,8 @@ impl SystemController{
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
 
-        self.curr_pos = [650.14, 1939.07, 681.57];
-        self.curr_ori = [0.02593, 0.08733, -0.98610, -0.13898];
+        self.curr_pos = FRONT_SPOKE_POS;
+        self.curr_ori = FRONT_SPOKE_ORI;
 
         let mut pcl_vec = self.fire_all_cams()?;
 
@@ -219,37 +221,39 @@ impl SystemController{
 
         for (i ,pcl) in pcl_list.iter_mut().enumerate(){  
 
-            let og_pos = OG_POS_LIST[i];
-            let og_ori = OG_ORI_LIST[i];
-           // Build unit quaternions directly from w,x,y,z (ABB order)
-            let q_og = UnitQuaternion::from_quaternion(
-                Quaternion::new(og_ori[0], og_ori[1], og_ori[2], og_ori[3])
+            //Calculate the cameras original position
+            let calib_pos = OG_POS_LIST[i];
+            let calib_ori = OG_ORI_LIST[i];
+
+            // Positions in metres
+            let calib_pos_m = Vector3::new(calib_pos[0], calib_pos[1], calib_pos[2]) / 1000.0;
+            //Create the original quaternion
+            let q_calib = UnitQuaternion::from_quaternion(
+                Quaternion::new(calib_ori[0], calib_ori[1], calib_ori[2], calib_ori[3])
             );
+
+            let tcp_at_calib = (Translation3::from(calib_pos_m).to_homogeneous() * q_calib.to_homogeneous());
+            let cam_at_calib =   CAM_TO_LOAD_CELL[i].try_inverse().unwrap() * LOAD_CELL_TO_SPHERE_TCP_TRANSFORM.try_inverse().unwrap() * tcp_at_calib;
+
+            //Calculate the cameras current position
+            let curr_pos_m = Vector3::new(self.curr_pos[0], self.curr_pos[1], self.curr_pos[2]) / 1000.0;
             let q_curr = UnitQuaternion::from_quaternion(
                 Quaternion::new(self.curr_ori[0], self.curr_ori[1], self.curr_ori[2], self.curr_ori[3])
             );
 
-            // Positions in metres
-            let og_pos_m = Vector3::new(og_pos[0], og_pos[1], og_pos[2]) / 1000.0;
-            let curr_pos_m = Vector3::new(self.curr_pos[0], self.curr_pos[1], self.curr_pos[2]) / 1000.0;
+            let tcp_at_curr = Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous();
+            let cam_at_curr = CAM_TO_LOAD_CELL[i].try_inverse().unwrap() * LOAD_CELL_TO_SPHERE_TCP_TRANSFORM.try_inverse().unwrap() * tcp_at_curr;
 
-            // cam pose at calibration time, in base frame
-            let cam_at_calib: Matrix4<f32> =
-                (Translation3::from(og_pos_m).to_homogeneous() * q_og.to_homogeneous()) *  LOAD_CELL_TO_SPHERE_TCP_TRANSFORM.try_inverse().unwrap() * CAM_TO_LOAD_CELL[i].try_inverse().unwrap();
+            //Calculate the transformation from the calibration frame to the current camera frame
+            let calib_to_current_transform = cam_at_curr * cam_at_calib.try_inverse().unwrap();
 
-            // cam pose atm, in base frame
-            let cam_at_curr: Matrix4<f32> =
-                (Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous()) *  LOAD_CELL_TO_SPHERE_TCP_TRANSFORM.try_inverse().unwrap() * CAM_TO_LOAD_CELL[i].try_inverse().unwrap();
+            println!("{}", calib_to_current_transform.try_inverse().unwrap());
+        
+            //The point is transformed from the current camera space -> calibration camera space -> world space
+            //The camera space is calculated by doing a rigid translationfrom the tcp position/orientation to the position of the camera
+            //There is no rotation because this is baked into the calibration to the world transform
 
-            // Motion from og pose to curr pose, expressed in base frame
-            let calib_to_sensor =   cam_at_curr.try_inverse().unwrap() * cam_at_calib  ;
-                
-            //Combine the standard transform and the position based transform     
-
-            //ORDER: Sensor frame (in current TCP frame) -> Force sensor frame (in current TCP frame) -> current TCP frame -> calibration frame -> world frame           
-
-            let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i].try_inverse().unwrap()  * calib_to_sensor;
-
+            let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i] * calib_to_current_transform.try_inverse().unwrap();
 
 
             pcl.transform_with(&sensor_to_world);         
