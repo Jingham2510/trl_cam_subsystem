@@ -233,7 +233,7 @@ impl SystemController{
             );
 
             let tcp_at_calib = (Translation3::from(calib_pos_m).to_homogeneous() * q_calib.to_homogeneous());
-            let cam_at_calib =   LOAD_CELL_TO_CAM[i].try_inverse().unwrap() * LOAD_CELL_TO_SPHERE_TCP_TRANSFORM.try_inverse().unwrap() * tcp_at_calib;
+            let cam_at_calib =   LOAD_CELL_TO_CAM[i] * LOAD_CELL_TO_SPHERE_TCP_TRANSFORM.try_inverse().unwrap() * tcp_at_calib;
 
             //Calculate the cameras current position
             let curr_pos_m = Vector3::new(self.curr_pos[0], self.curr_pos[1], self.curr_pos[2]) / 1000.0;
@@ -242,7 +242,7 @@ impl SystemController{
             );
 
             let tcp_at_curr = Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous();
-            let cam_at_curr = LOAD_CELL_TO_CAM[i].try_inverse().unwrap() * LOAD_CELL_TO_SPHERE_TCP_TRANSFORM.try_inverse().unwrap() * tcp_at_curr;
+            let cam_at_curr = LOAD_CELL_TO_CAM[i] * LOAD_CELL_TO_SPHERE_TCP_TRANSFORM.try_inverse().unwrap() * tcp_at_curr;
 
             //Calculate the transformation from the calibration frame to the current camera frame
             let calib_to_current_transform = cam_at_curr * cam_at_calib.try_inverse().unwrap();
