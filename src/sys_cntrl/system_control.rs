@@ -90,21 +90,21 @@ const CALIB_FRAME_TO_WORLD_TRANSFORM : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFOR
 ///FORCE SENSOR TO CAMERA TRANSFORMS - DEFINED IN THE TCP FRAME - redo translations
 
 const FORCE_TO_FRONT_CAM : Matrix4<f32> = matrix![1.0,  0.0,  0.0, 0.0;
-                                                0.0, 1.0,  0.0, -0.30414;
-                                                0.0, 0.0, 1.0, -0.06813;
+                                                0.0, 1.0,  0.0, 0.30414;
+                                                0.0, 0.0, 1.0, 0.06813;
                                                 0.0, 0.0, 0.0, 1.0];
 
 
-const FORCE_TO_BL_CAM: Matrix4<f32> = matrix![1.0000000,  0.0,  0.0, -0.26381;
-                                            0.0, 1.0,  0.0, 0.15275;
-                                            0.0, 0.0, 1.0, -0.06813;
+const FORCE_TO_BL_CAM: Matrix4<f32> = matrix![1.0000000,  0.0,  0.0, 0.26381;
+                                            0.0, 1.0,  0.0, -0.15275;
+                                            0.0, 0.0, 1.0, 0.06813;
                                             0.0, 0.0, 0.0, 1.0];
 
 
 
-const FORCE_TO_BR_CAM : Matrix4<f32> = matrix![1.0,  0.0,  0.0, 0.26377;
-                                                0.0, 1.0,  0.0, 0.15275;
-                                                0.0, 0.0, 1.0, -0.06813;
+const FORCE_TO_BR_CAM : Matrix4<f32> = matrix![1.0,  0.0,  0.0, -0.26377;
+                                                0.0, 1.0,  0.0, -0.15275;
+                                                0.0, 0.0, 1.0, 0.06813;
                                                 0.0, 0.0, 0.0, 1.0];
 
 
