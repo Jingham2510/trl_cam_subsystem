@@ -87,28 +87,28 @@ const CALIB_FRAME_TO_WORLD_TRANSFORM : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFOR
 
 
 
-///FORCE SENSOR TO CAMERA TRANSFORMS - DEFINED IN THE CAMERA FRAME - redo translations
+///FORCE SENSOR TO CAMERA TRANSFORMS - DEFINED IN THE TCP FRAME - redo translations
 
-const FRONT_CAM_TO_FORCE : Matrix4<f32> = matrix![1.0,  0.0,  0.0, 0.0;
-                                                0.0, 1.0,  0.0, 0.262496;
-                                                0.0, 0.0, 1.0, 0.168043;
+const FORCE_TO_FRONT_CAM : Matrix4<f32> = matrix![1.0,  0.0,  0.0, 0.0;
+                                                0.0, 1.0,  0.0, 0.30414;
+                                                0.0, 0.0, 1.0, 0.06813;
                                                 0.0, 0.0, 0.0, 1.0];
 
 
-const BL_CAM_TO_FORCE: Matrix4<f32> = matrix![1.0000000,  0.0,  0.0, -0.00020;
-                                            0.0, 1.0,  0.0, -0.26300;
-                                            0.0, 0.0, 1.0, 0.16810;
+const FORCE_TO_BL_CAM: Matrix4<f32> = matrix![1.0000000,  0.0,  0.0,0.26381;
+                                            0.0, 1.0,  0.0, -0.15275;
+                                            0.0, 0.0, 1.0, 0.06813;
                                             0.0, 0.0, 0.0, 1.0];
 
 
 
-const BR_CAM_TO_FORCE : Matrix4<f32> = matrix![1.0,  0.0,  0.0, 0.0002;
-                                                0.0, 1.0,  0.0, -0.2630;
-                                                0.0, 0.0, 1.0, 0.16810;
+const FORCE_TO_BR_CAM : Matrix4<f32> = matrix![1.0,  0.0,  0.0, -0.26377;
+                                                0.0, 1.0,  0.0, -0.15275;
+                                                0.0, 0.0, 1.0, 0.06813;
                                                 0.0, 0.0, 0.0, 1.0];
 
 
-const CAM_TO_LOAD_CELL :[Matrix4<f32>; 3] = [FRONT_CAM_TO_FORCE, BL_CAM_TO_FORCE, BR_CAM_TO_FORCE];
+const LOAD_CELL_TO_CAM :[Matrix4<f32>; 3] = [FORCE_TO_FRONT_CAM, FORCE_TO_BL_CAM, FORCE_TO_BR_CAM];
 
 
 ///TCP POINT TO FORCE SENSOR POINT TRANSFORM - DEFINED IN THE CURRENT TCP FRAME
@@ -233,7 +233,7 @@ impl SystemController{
             );
 
             let tcp_at_calib = (Translation3::from(calib_pos_m).to_homogeneous() * q_calib.to_homogeneous());
-            let cam_at_calib =   CAM_TO_LOAD_CELL[i].try_inverse().unwrap() * LOAD_CELL_TO_SPHERE_TCP_TRANSFORM.try_inverse().unwrap() * tcp_at_calib;
+            let cam_at_calib =   LOAD_CELL_TO_CAM[i].try_inverse().unwrap() * LOAD_CELL_TO_SPHERE_TCP_TRANSFORM.try_inverse().unwrap() * tcp_at_calib;
 
             //Calculate the cameras current position
             let curr_pos_m = Vector3::new(self.curr_pos[0], self.curr_pos[1], self.curr_pos[2]) / 1000.0;
@@ -242,7 +242,7 @@ impl SystemController{
             );
 
             let tcp_at_curr = Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous();
-            let cam_at_curr = CAM_TO_LOAD_CELL[i].try_inverse().unwrap() * LOAD_CELL_TO_SPHERE_TCP_TRANSFORM.try_inverse().unwrap() * tcp_at_curr;
+            let cam_at_curr = LOAD_CELL_TO_CAM[i].try_inverse().unwrap() * LOAD_CELL_TO_SPHERE_TCP_TRANSFORM.try_inverse().unwrap() * tcp_at_curr;
 
             //Calculate the transformation from the calibration frame to the current camera frame
             let calib_to_current_transform = cam_at_curr * cam_at_calib.try_inverse().unwrap();
