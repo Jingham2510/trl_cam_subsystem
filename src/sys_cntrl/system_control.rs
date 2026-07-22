@@ -195,7 +195,7 @@ impl SystemController{
 
 
         self.curr_pos = [698.94, 1899.08, 214.36];
-        self.curr_ori = [0.00125, -0.11320, 0.99355, 0.00619];
+        self.curr_ori = [0.00395, 0.03268, 0.99269, 0.11609];
 
         let mut pcl_vec = self.fire_all_cams()?;
 
