@@ -65,11 +65,11 @@ const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![0.99780846, -0.031050282, -
 
 
 
-const BACK_SPOKE_L_POS : [f32; 3] = [203.14, 2065.79, 1075.95];
-const BACK_SPOKE_L_ORI : [f32; 4] = [0.00013, 0.06956, 0.99756, 0.00660];
-const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![0.01105789,   -0.9529749,   0.30284756,  -0.07730941;
-                                                      0.9999226,  0.012272284, 0.0021071497,    0.5293364;
-                                                      -0.005724692,    0.3028008,    0.9530368,   -1.2832978;
+const BACK_SPOKE_L_POS : [f32; 3] = [203.45, 2111.76, 1075.52];
+const BACK_SPOKE_L_ORI : [f32; 4] = [0.0, -0.10013, -0.99495, -0.00647];
+const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![0.009211072,      -0.952531,     0.30430272,    -0.08579726;
+                                                      0.9999544,    0.009555463, -0.00035746818,     0.46127927;
+                                                      -0.0025672533,     0.30429208,     0.95257545,      -1.285198;
                                                       0.0, 0.0, 0.0, 1.0];
 
 
@@ -197,8 +197,8 @@ impl SystemController{
         //self.curr_pos = [615.64, 2248.90, 634.11];
         //self.curr_ori = [0.00126, -0.11324, 0.99355, 0.00623];
 
-        self.curr_pos = FRONT_SPOKE_POS;
-        self.curr_ori = FRONT_SPOKE_ORI;
+        self.curr_pos = BACK_SPOKE_L_POS;
+        self.curr_ori = BACK_SPOKE_L_ORI;
 
         let mut pcl_vec = self.fire_all_cams()?;
 
