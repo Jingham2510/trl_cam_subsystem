@@ -194,8 +194,11 @@ impl SystemController{
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
 
-        self.curr_pos = [615.64, 2248.90, 634.11];
-        self.curr_ori = [0.00126, -0.11324, 0.99355, 0.00623];
+        //self.curr_pos = [615.64, 2248.90, 634.11];
+        //self.curr_ori = [0.00126, -0.11324, 0.99355, 0.00623];
+
+        self.curr_pos = FRONT_SPOKE_POS;
+        self.curr_ori = FRONT_SPOKE_ORI;
 
         let mut pcl_vec = self.fire_all_cams()?;
 
