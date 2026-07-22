@@ -112,9 +112,9 @@ const LOAD_CELL_TO_CAM :[Matrix4<f32>; 3] = [FORCE_TO_FRONT_CAM, FORCE_TO_BL_CAM
 
 
 ///TCP POINT TO FORCE SENSOR POINT TRANSFORM - DEFINED IN THE CURRENT TCP FRAME
-const LOAD_CELL_TO_SPHERE_TCP_TRANSFORM : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
+const SPHERE_TCP_TO_LOAD_CELL : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
                                                             0.0, 1.0, 0.0, 0.0;
-                                                            0.0, 0.0, 1.0, -0.35;
+                                                            0.0, 0.0, 1.0, 0.35;
                                                             0.0, 0.0, 0.0, 1.0];
 
 
@@ -233,7 +233,7 @@ impl SystemController{
             );
 
             let tcp_at_calib = (Translation3::from(calib_pos_m).to_homogeneous() * q_calib.to_homogeneous());
-            let cam_at_calib =   LOAD_CELL_TO_CAM[i] * LOAD_CELL_TO_SPHERE_TCP_TRANSFORM.try_inverse().unwrap() * tcp_at_calib;
+            let cam_at_calib =   LOAD_CELL_TO_CAM[i] * SPHERE_TCP_TO_LOAD_CELL * tcp_at_calib;
 
             //Calculate the cameras current position
             let curr_pos_m = Vector3::new(self.curr_pos[0], self.curr_pos[1], self.curr_pos[2]) / 1000.0;
@@ -242,21 +242,21 @@ impl SystemController{
             );
 
             let tcp_at_curr = Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous();
-            let cam_at_curr = LOAD_CELL_TO_CAM[i] * LOAD_CELL_TO_SPHERE_TCP_TRANSFORM.try_inverse().unwrap() * tcp_at_curr;
+            let cam_at_curr = LOAD_CELL_TO_CAM[i] * SPHERE_TCP_TO_LOAD_CELL * tcp_at_curr;
 
             //Calculate the transformation from the calibration frame to the current camera frame
             let calib_to_current_transform = cam_at_curr * cam_at_calib.try_inverse().unwrap();
 
 
-            println!("cam to tcp: {}", LOAD_CELL_TO_CAM[i] * LOAD_CELL_TO_SPHERE_TCP_TRANSFORM.try_inverse().unwrap());
+            println!("tcp to cam: {}", LOAD_CELL_TO_CAM[i] * SPHERE_TCP_TO_LOAD_CELL.try_inverse().unwrap());
 
-            println!("cam delta: {}", calib_to_current_transform.try_inverse().unwrap());
+            println!("cam delta to calibration cam pos: {}", calib_to_current_transform.try_inverse().unwrap());
         
             //The point is transformed from the current camera space -> calibration camera space -> world space
             //The camera space is calculated by doing a rigid translationfrom the tcp position/orientation to the position of the camera
-            //There is no rotation because this is baked into the calibration to the world transform
+            //There is no rotation because this is implicit into the calibration to the world transform
 
-            let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i] * calib_to_current_transform.try_inverse().unwrap();
+            let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i] * calib_to_current_transform;
 
 
             pcl.transform_with(&sensor_to_world);         
