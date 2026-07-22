@@ -194,7 +194,7 @@ impl SystemController{
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
 
-        self.curr_pos = [233.34, 1685.15, 634.11];
+        self.curr_pos = [233.34, 216.77, 634.11];
         self.curr_ori = [0.00126, -0.11324, 0.99355, 0.00623];
 
         let mut pcl_vec = self.fire_all_cams()?;
@@ -247,8 +247,6 @@ impl SystemController{
             //Calculate the transformation from the calibration frame to the current camera frame
             let calib_to_current_transform = cam_at_curr * cam_at_calib.try_inverse().unwrap();
 
-
-            println!("tcp to cam: {}", LOAD_CELL_TO_CAM[i] * SPHERE_TCP_TO_LOAD_CELL.try_inverse().unwrap());
 
             println!("cam delta to calibration cam pos: {}", calib_to_current_transform.try_inverse().unwrap());
         
