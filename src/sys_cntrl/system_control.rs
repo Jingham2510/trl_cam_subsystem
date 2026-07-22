@@ -254,7 +254,7 @@ impl SystemController{
             //The camera space is calculated by doing a rigid translationfrom the tcp position/orientation to the position of the camera
             //There is no rotation because this is implicit into the calibration to the world transform
 
-            let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i] * calib_to_current_transform.try_inverse().unwrap();
+            let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i].try_inverse().unwrap() * calib_to_current_transform.try_inverse().unwrap();
 
 
             pcl.transform_with(&sensor_to_world);         
