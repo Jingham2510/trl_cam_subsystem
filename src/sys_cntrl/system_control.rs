@@ -114,7 +114,7 @@ const LOAD_CELL_TO_CAM :[Matrix4<f32>; 3] = [FORCE_TO_FRONT_CAM, FORCE_TO_BL_CAM
 ///TCP POINT TO FORCE SENSOR POINT TRANSFORM - DEFINED IN THE CURRENT TCP FRAME
 const SPHERE_TCP_TO_LOAD_CELL : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
                                                             0.0, 1.0, 0.0, 0.0;
-                                                            0.0, 0.0, 1.0, 0.35;
+                                                            0.0, 0.0, 1.0, -0.35;
                                                             0.0, 0.0, 0.0, 1.0];
 
 
@@ -244,7 +244,6 @@ impl SystemController{
                 Quaternion::new(self.curr_ori[0], self.curr_ori[1], self.curr_ori[2], self.curr_ori[3])
             );
 
-            println!("{}", q_curr);
 
             let tcp_at_curr = Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous();
             let cam_at_curr = tcp_at_curr * SPHERE_TCP_TO_LOAD_CELL *  LOAD_CELL_TO_CAM[i];;
