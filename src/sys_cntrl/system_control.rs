@@ -248,6 +248,8 @@ impl SystemController{
             let calib_to_current_transform = cam_at_curr * cam_at_calib.try_inverse().unwrap();
 
 
+            println!("cam to tcp: {}", LOAD_CELL_TO_CAM[i] * LOAD_CELL_TO_SPHERE_TCP_TRANSFORM.try_inverse().unwrap());
+
             println!("cam delta: {}", calib_to_current_transform.try_inverse().unwrap());
         
             //The point is transformed from the current camera space -> calibration camera space -> world space
