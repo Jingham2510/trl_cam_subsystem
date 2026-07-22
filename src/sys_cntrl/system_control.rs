@@ -197,8 +197,8 @@ impl SystemController{
         //self.curr_pos = [615.64, 2248.90, 634.11];
         //self.curr_ori = [0.00126, -0.11324, 0.99355, 0.00623];
 
-        self.curr_pos = BACK_SPOKE_R_POS;
-        self.curr_ori = [0.00602, -0.41267, 0.91082, 0.00876];
+        self.curr_pos = [BACK_SPOKE_R_POS[0] + 10.0, BACK_SPOKE_R_POS[1] + 20.0, BACK_SPOKE_R_POS[2] + 30.0];
+        self.curr_ori = BACK_SPOKE_R_ORI;
 
         let mut pcl_vec = self.fire_all_cams()?;
 
