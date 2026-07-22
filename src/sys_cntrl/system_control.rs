@@ -87,24 +87,24 @@ const CALIB_FRAME_TO_WORLD_TRANSFORM : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFOR
 
 
 
-///FORCE SENSOR TO CAMERA TRANSFORMS - DEFINED IN THE TCP FRAME - redo translations
+///FORCE SENSOR TO CAMERA TRANSFORMS - DEFINED IN THE TCP FRAME 
 
 const FORCE_TO_FRONT_CAM : Matrix4<f32> = matrix![1.0,  0.0,  0.0, 0.0;
-                                                0.0000000, -0.9396926, 0.3420202, 0.30414;
-                                                0.0000000,  -0.3420202, -0.9396926, 0.06813;
+                                                0.0000000, -0.9396926, -0.3420202, 0.30414;
+                                                0.0000000,  0.3420202, -0.9396926, 0.06813;
                                                 0.0, 0.0, 0.0, 1.0];
 
 
-const FORCE_TO_BL_CAM: Matrix4<f32> = matrix![0.5000000,  -0.8660254,  0.0000000, 0.26381;
-                                            -0.8137977, -0.4698463,  -0.3420202, -0.15275;
-                                            0.2961981, 0.1710101, -0.9396926, 0.06813;
+const FORCE_TO_BL_CAM: Matrix4<f32> = matrix![0.5000000,  0.8660254,  0.0000000, 0.26381;
+                                            0.8137977, -0.4698463,  0.3420202, -0.15275;
+                                            0.2961981, -0.1710101, -0.9396926, 0.06813;
                                             0.0, 0.0, 0.0, 1.0];
 
 
 
-const FORCE_TO_BR_CAM : Matrix4<f32> = matrix![0.5000000,  0.8660254,  0.0000000, -0.26377;
-                                                0.8137977, -0.4698463, -0.3420202, -0.15275;
-                                               -0.2961981,  0.1710101, -0.9396926 , 0.06813;
+const FORCE_TO_BR_CAM : Matrix4<f32> = matrix![0.5000000, -0.8660254,  0.0000000, -0.26377;
+                                                -0.8137977, -0.4698463,  0.3420202, -0.15275;
+                                                -0.2961981, -0.1710101, -0.9396926, 0.06813;
                                                 0.0, 0.0, 0.0, 1.0];
 
 
@@ -198,7 +198,7 @@ impl SystemController{
         //self.curr_ori = [0.00126, -0.11324, 0.99355, 0.00623];
 
         self.curr_pos = BACK_SPOKE_R_POS;
-        self.curr_ori = BACK_SPOKE_R_ORI;
+        self.curr_ori = [0.00602, -0.41267, 0.91082, 0.00876];
 
         let mut pcl_vec = self.fire_all_cams()?;
 
