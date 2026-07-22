@@ -245,7 +245,7 @@ impl SystemController{
             let cam_at_curr = tcp_at_curr * SPHERE_TCP_TO_LOAD_CELL *  LOAD_CELL_TO_CAM[i];;
 
             //Calculate the transformation from the calibration frame to the current camera frame
-            let calib_to_current_transform = cam_at_curr * cam_at_calib.try_inverse().unwrap();
+            let calib_to_current_transform = cam_at_calib.try_inverse().unwrap() * cam_at_curr ;
 
 
             println!("cam delta to calibration cam pos: {}", calib_to_current_transform.try_inverse().unwrap());
@@ -254,7 +254,7 @@ impl SystemController{
             //The camera space is calculated by doing a rigid translationfrom the tcp position/orientation to the position of the camera
             //There is no rotation because this is implicit into the calibration to the world transform
 
-            let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i] * calib_to_current_transform.try_inverse().unwrap();
+            let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i] * calib_to_current_transform.;
 
             println!("Final transform: {}", sensor_to_world);
 
