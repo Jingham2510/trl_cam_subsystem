@@ -83,7 +83,7 @@ const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![0.9690566,    0.208878, -0
 
 const OG_POS_LIST : [[f32;3] ;3] = [FRONT_SPOKE_POS, BACK_SPOKE_L_POS, BACK_SPOKE_R_POS];
 const OG_ORI_LIST : [[f32;4] ;3] = [FRONT_SPOKE_ORI, BACK_SPOKE_L_ORI, BACK_SPOKE_R_ORI];
-const CALIB_FRAME_TO_WORLD_TRANSFORM : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM , BACK_SPOKE_L_TRANSFORM , BACK_SPOKE_R_TRANSFORM];
+const T_WORLD_CALIB : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM , BACK_SPOKE_L_TRANSFORM , BACK_SPOKE_R_TRANSFORM];
 
 
 
@@ -108,13 +108,13 @@ const FORCE_TO_BR_CAM : Matrix4<f32> = matrix![0.5000000, -0.8660254,  0.0000000
                                                 0.0, 0.0, 0.0, 1.0];
 
 
-const LOAD_CELL_TO_CAM :[Matrix4<f32>; 3] = [FORCE_TO_FRONT_CAM, FORCE_TO_BL_CAM, FORCE_TO_BR_CAM];
+const T_CAM_LC :[Matrix4<f32>; 3] = [FORCE_TO_FRONT_CAM, FORCE_TO_BL_CAM, FORCE_TO_BR_CAM];
 
 
 ///TCP POINT TO FORCE SENSOR POINT TRANSFORM - DEFINED IN THE CURRENT TCP FRAME
-const SPHERE_TCP_TO_LOAD_CELL : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
+const T_STCP_LC : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
                                                             0.0, 1.0, 0.0, 0.0;
-                                                            0.0, 0.0, 1.0, -0.35;
+                                                            0.0, 0.0, 1.0, 0.35;
                                                             0.0, 0.0, 0.0, 1.0];
 
 
@@ -228,46 +228,52 @@ impl SystemController{
             let calib_pos = OG_POS_LIST[i];
             let calib_ori = OG_ORI_LIST[i];
 
+
+
+            //THIS IS THE PROBLEM----------------------- as the calibration pose is correct
+
             // Positions in metres
             let calib_pos_m = Vector3::new(calib_pos[0], calib_pos[1], calib_pos[2]) / 1000.0;
             //Create the original quaternion
             let q_calib = UnitQuaternion::from_quaternion(
                 Quaternion::new(calib_ori[0], calib_ori[1], calib_ori[2], calib_ori[3])
-            );
+            ).normalize();
 
             let tcp_at_calib = (Translation3::from(calib_pos_m).to_homogeneous() * q_calib.to_homogeneous());
-            let cam_at_calib =   tcp_at_calib * SPHERE_TCP_TO_LOAD_CELL *  LOAD_CELL_TO_CAM[i];
+            let cam_at_calib =   tcp_at_calib * T_STCP_LC *  T_CAM_LC[i].try_inverse().unwrap();
 
             //Calculate the cameras current position
             let curr_pos_m = Vector3::new(self.curr_pos[0], self.curr_pos[1], self.curr_pos[2]) / 1000.0;
             let q_curr = UnitQuaternion::from_quaternion(
                 Quaternion::new(self.curr_ori[0], self.curr_ori[1], self.curr_ori[2], self.curr_ori[3])
-            );
+            ).normalize();
 
 
             let tcp_at_curr = Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous();
-            let cam_at_curr = tcp_at_curr * SPHERE_TCP_TO_LOAD_CELL *  LOAD_CELL_TO_CAM[i];;
+            let cam_at_curr = tcp_at_curr * T_STCP_LC *  T_CAM_LC[i].try_inverse().unwrap();
 
             //Calculate the transformation from the calibration frame to the current camera frame
-            let calib_to_current_transform = cam_at_calib.try_inverse().unwrap() * cam_at_curr ;
+            let T_calib_curr = cam_at_calib.try_inverse().unwrap() * cam_at_curr ;
 
 
             println!("{}", calib_pos_m);
             println!("{}", curr_pos_m);
 
 
-            println!("cam delta to calibration cam pos: {}", calib_to_current_transform);
+            println!("cam delta to calibration cam pos: {}", T_curr_calib);
+
+            //--------------------
         
             //The point is transformed from the current camera space -> calibration camera space -> world space
-            //The camera space is calculated by doing a rigid translationfrom the tcp position/orientation to the position of the camera
-            //There is no rotation because this is implicit into the calibration to the world transform
+            //The camera space is calculated by doing a rigid transformation from the tcp position/orientation to the position of the camera
+        
 
-            let sensor_to_world =   CALIB_FRAME_TO_WORLD_TRANSFORM[i] * calib_to_current_transform;
+            let T_world_curr =   T_WORLD_CALIB[i] * T_calib_curr;
 
-            println!("Final transform: {}", sensor_to_world);
+            println!("Final transform: {}", T_world_curr);
 
 
-            pcl.transform_with(&sensor_to_world);         
+            pcl.transform_with(&T_world_curr);         
 
             
 
