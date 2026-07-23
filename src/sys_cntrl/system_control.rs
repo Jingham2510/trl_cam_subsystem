@@ -255,6 +255,7 @@ impl SystemController{
 
             //Calculate the transformation from the calibration frame to the current camera frame
             let T_calib_curr= cam_at_calib.try_inverse().unwrap() * cam_at_curr;
+            let T_calib_curr = cam_at_curr.try_inverse().unwrap() * cam_at_calib;
 
 
             println!("{}", calib_pos_m);
