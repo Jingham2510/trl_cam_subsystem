@@ -237,9 +237,9 @@ impl SystemController{
             //Create the original quaternion
             let q_calib = UnitQuaternion::from_quaternion(
                 Quaternion::new(calib_ori[0], calib_ori[1], calib_ori[2], calib_ori[3])
-            ).normalize();
+            );
 
-            let tcp_at_calib = Translation3::from(calib_pos_m).to_homogeneous() * q_calib.coords.to_homogeneous();
+            let tcp_at_calib = Translation3::from(calib_pos_m).to_homogeneous() * q_calib.to_homogeneous();
         
             let cam_at_calib =   tcp_at_calib * T_STCP_LC *  T_CAM_LC[i].try_inverse().unwrap();
 
@@ -247,10 +247,10 @@ impl SystemController{
             let curr_pos_m = Vector3::new(self.curr_pos[0], self.curr_pos[1], self.curr_pos[2]) / 1000.0;
             let q_curr = UnitQuaternion::from_quaternion(
                 Quaternion::new(self.curr_ori[0], self.curr_ori[1], self.curr_ori[2], self.curr_ori[3])
-            ).normalize();
+            );
 
 
-            let tcp_at_curr = Translation3::from(curr_pos_m).to_homogeneous() * q_curr.coords.to_homogeneous();
+            let tcp_at_curr = Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous();
             let cam_at_curr = tcp_at_curr * T_STCP_LC *  T_CAM_LC[i].try_inverse().unwrap();
 
             //Calculate the transformation from the calibration frame to the current camera frame
