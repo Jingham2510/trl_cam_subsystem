@@ -223,8 +223,8 @@ impl SystemController{
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
 
-        self.curr_pos = [119.71, 1368.28, 884.19];
-        self.curr_ori = [0.00127, -0.11322, 0.99355, 0.00627];
+        self.curr_pos = [691.62, 2146.64, 1208.36];
+        self.curr_ori = [0.00311, -0.29709, 0.91777, 0.00319];
 
         //self.curr_pos = [BACK_SPOKE_R_POS[0] + 10.0, BACK_SPOKE_R_POS[1] + 20.0, BACK_SPOKE_R_POS[2] + 30.0];
         //self.curr_ori = BACK_SPOKE_R_ORI;
