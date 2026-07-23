@@ -108,7 +108,7 @@ const FORCE_TO_BR_CAM : Matrix4<f32> = matrix![0.5000000, -0.8660254,  0.0000000
                                                 0.0, 0.0, 0.0, 1.0];
 
 
-const T_CAM_LC :[Matrix4<f32>; 3] = [FORCE_TO_FRONT_CAM, FORCE_TO_BL_CAM, FORCE_TO_BR_CAM];
+const T_LC_CAM :[Matrix4<f32>; 3] = [FORCE_TO_FRONT_CAM, FORCE_TO_BL_CAM, FORCE_TO_BR_CAM];
 
 
 ///TCP POINT TO FORCE SENSOR POINT TRANSFORM - DEFINED IN THE CURRENT TCP FRAME
@@ -241,7 +241,7 @@ impl SystemController{
 
             let tcp_at_calib = Translation3::from(calib_pos_m).to_homogeneous() * q_calib.to_homogeneous();
         
-            let cam_at_calib =   tcp_at_calib * T_STCP_LC *  T_CAM_LC[i].try_inverse().unwrap();
+            let cam_at_calib =   tcp_at_calib * T_STCP_LC *  T_LC_CAM[i];
 
             //Calculate the cameras current position
             let curr_pos_m = Vector3::new(self.curr_pos[0], self.curr_pos[1], self.curr_pos[2]) / 1000.0;
@@ -251,7 +251,7 @@ impl SystemController{
 
 
             let tcp_at_curr = Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous();
-            let cam_at_curr = tcp_at_curr * T_STCP_LC *  T_CAM_LC[i].try_inverse().unwrap();
+            let cam_at_curr = tcp_at_curr * T_STCP_LC *  T_LC_CAM[i];
 
             //Calculate the transformation from the calibration frame to the current camera frame
             let T_calib_curr= cam_at_calib.try_inverse().unwrap() * cam_at_curr;
