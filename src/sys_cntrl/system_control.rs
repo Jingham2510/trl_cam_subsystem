@@ -54,7 +54,7 @@ const GLOBAL_HMAP_HEIGHT : usize = (GLOBAL_AREA_HEIGHT / HMAP_RES) as usize;
 
 //CALIB POS TO WORLD TRANSFORM -----------------
 
-const FRONT_SPOKE_POS : [f32; 3] = [557.90, 2573.90, 1012.96];
+const FRONT_SPOKE_POS : [f32; 3] = [557.90, 2573.90, 912.96];
 const FRONT_SPOKE_ORI : [f32; 4] = [0.00128, -0.11318, 0.99355, 0.00633];
 const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![0.99780846, -0.031050282, -0.058431163,    0.5513697;
                                                     0.053386517,   0.89948565,    0.4336768,   -0.2975615;
@@ -65,7 +65,7 @@ const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![0.99780846, -0.031050282, -
 
 
 
-const BACK_SPOKE_L_POS : [f32; 3] = [203.45, 2111.76, 1075.52];
+const BACK_SPOKE_L_POS : [f32; 3] = [203.45, 2111.76, 975.52];
 const BACK_SPOKE_L_ORI : [f32; 4] = [0.0, -0.10013, -0.99495, -0.00647];
 const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![0.009211072,      -0.952531,     0.30430272,    -0.08579726;
                                                       0.9999544,    0.009555463, -0.00035746818,     0.46127927;
@@ -74,7 +74,7 @@ const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![0.009211072,      -0.95253
 
 
 
-const BACK_SPOKE_R_POS : [f32; 3] = [593.20, 1679.95, 1188.85];
+const BACK_SPOKE_R_POS : [f32; 3] = [593.20, 1679.95, 1088.85];
 const BACK_SPOKE_R_ORI : [f32; 4] = [0.00082, -0.25077, -0.96799, -0.01061];
 const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![0.9690566,    0.208878, -0.13152699,   0.6255115;
                                                 -0.245561,  0.86992925, -0.42769524,   1.2208089 ;
@@ -87,8 +87,8 @@ const T_WORLD_CALIB : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM , BACK_SPOKE_L_
 
 
 
-///FORCE SENSOR TO CAMERA TRANSFORMS - DEFINED IN THE TCP FRAME 
-
+///FORCE SENSOR TO CAMERA TRANSFORMS - DEFINED IN THE TCP FRAME - CAD FORMULATED
+/*
 const FORCE_TO_FRONT_CAM : Matrix4<f32> = matrix![1.0,  0.0,  0.0, 0.0;
                                                 0.0000000, -0.9396926, -0.3420202, 0.30414;
                                                 0.0000000,  0.3420202, -0.9396926, 0.06813;
@@ -107,14 +107,43 @@ const FORCE_TO_BR_CAM : Matrix4<f32> = matrix![0.5000000, -0.8660254,  0.0000000
                                                 -0.2961981, -0.1710101, -0.9396926, 0.06813;
                                                 0.0, 0.0, 0.0, 1.0];
 
+*/
+
+///FORCE SENSOR TO CAMERA TRANSFORMS - DEFINED IN THE TCP FRAME -opencv calced
+
+const FORCE_TO_FRONT_CAM : Matrix4<f32> = matrix![0.9080673194186233, -0.20153541771615413, -0.3671474074671523, -0.042870545878585055;
+0.24310293696487, 0.9674562671706142, 0.07020920987559837, 0.12047894560655156;
+0.3410494178897398, -0.15300930206453672, 0.9275092711336059, 0.039469409569910754;
+0.0, 0.0, 0.0, 1.0;];
+
+
+const FORCE_TO_BL_CAM: Matrix4<f32> = matrix![0.7733881466923593, 0.3632840152948649, -0.5195146761998144, 993.4572266142809;
+-0.45188716501203635, 0.8906793721891169, -0.04988232206087684, 683.4906677318329;
+0.44459955539017615, 0.2733404108214531, 0.853004252720241, 4052.329969111789;
+0.0, 0.0, 0.0, 1.0;];
+
+
+
+const FORCE_TO_BR_CAM : Matrix4<f32> = matrix![0.903898358177933, -0.18592374533839154, 0.38522736014278924, -25.78914677907128;
+0.33357562673170993, 0.8701405292341293, -0.3627433812417484, -4.455395350696218;
+-0.26775933099293525, 0.45638560483816143, 0.8485382256343679, -185.3304416808985;
+0.0, 0.0, 0.0, 1.0;];
+
+
 
 const T_LC_CAM :[Matrix4<f32>; 3] = [FORCE_TO_FRONT_CAM, FORCE_TO_BL_CAM, FORCE_TO_BR_CAM];
 
 
 ///TCP POINT TO FORCE SENSOR POINT TRANSFORM - DEFINED IN THE CURRENT TCP FRAME
+/// USE FC TO TCP DO NOT MATCH THE TCP SPECIFIED IN RAPID
 const T_STCP_LC : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
                                                             0.0, 1.0, 0.0, 0.0;
                                                             0.0, 0.0, 1.0, 0.35;
+                                                            0.0, 0.0, 0.0, 1.0];
+
+const T_NOTOOL_LC: Matrix4<f32> =  matrix![1.0, 0.0, 0.0, 0.0;
+                                                            0.0, 1.0, 0.0, 0.0;
+                                                            0.0, 0.0, 1.0, 0.0;
                                                             0.0, 0.0, 0.0, 1.0];
 
 
@@ -255,7 +284,7 @@ impl SystemController{
 
             //Calculate the transformation from the calibration frame to the current camera frame
             let T_calib_curr= cam_at_calib.try_inverse().unwrap() * cam_at_curr;
-            let T_calib_curr = cam_at_curr.try_inverse().unwrap() * cam_at_calib;
+            
 
 
             println!("{}", calib_pos_m);
