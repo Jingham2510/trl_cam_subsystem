@@ -253,14 +253,14 @@ impl SystemController{
             let cam_at_curr = tcp_at_curr * T_STCP_LC *  T_CAM_LC[i].try_inverse().unwrap();
 
             //Calculate the transformation from the calibration frame to the current camera frame
-            let T_calib_curr = cam_at_calib.try_inverse().unwrap() * cam_at_curr ;
+            let T_calib_curr= cam_at_calib.try_inverse().unwrap() * cam_at_curr;
 
 
             println!("{}", calib_pos_m);
             println!("{}", curr_pos_m);
 
 
-            println!("cam delta to calibration cam pos: {}", T_curr_calib);
+            println!("cam delta to calibration cam pos: {}", T_calib_curr);
 
             //--------------------
         
