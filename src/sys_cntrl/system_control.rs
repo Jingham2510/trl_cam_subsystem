@@ -138,7 +138,7 @@ const T_LC_CAM :[Matrix4<f32>; 3] = [FORCE_TO_FRONT_CAM, FORCE_TO_BL_CAM, FORCE_
 /// USE FC TO TCP DO NOT MATCH THE TCP SPECIFIED IN RAPID
 const T_STCP_LC : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
                                                             0.0, 1.0, 0.0, 0.0;
-                                                            0.0, 0.0, 1.0, 0.35;
+                                                            0.0, 0.0, 1.0, 0.45;
                                                             0.0, 0.0, 0.0, 1.0];
 
 const T_NOTOOL_LC: Matrix4<f32> =  matrix![1.0, 0.0, 0.0, 0.0;
@@ -223,11 +223,9 @@ impl SystemController{
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
 
-        self.curr_pos = [691.62, 2146.64, 1208.36];
-        self.curr_ori = [0.00311, -0.29709, 0.91777, 0.00319];
+        //self.curr_pos = [691.62, 2146.64, 1208.36];
+        //self.curr_ori = [0.00311, -0.29709, 0.91777, 0.00319];
 
-        //self.curr_pos = [BACK_SPOKE_R_POS[0] + 10.0, BACK_SPOKE_R_POS[1] + 20.0, BACK_SPOKE_R_POS[2] + 30.0];
-        //self.curr_ori = BACK_SPOKE_R_ORI;
 
         let mut pcl_vec = self.fire_all_cams()?;
 
@@ -270,7 +268,7 @@ impl SystemController{
 
             let tcp_at_calib = Translation3::from(calib_pos_m).to_homogeneous() * q_calib.to_homogeneous();
         
-            let cam_at_calib =   tcp_at_calib * T_STCP_LC *  T_LC_CAM[i];
+            let cam_at_calib =   tcp_at_calib * T_NOTOOL_LC  *  T_LC_CAM[i];
 
             //Calculate the cameras current position
             let curr_pos_m = Vector3::new(self.curr_pos[0], self.curr_pos[1], self.curr_pos[2]) / 1000.0;
@@ -280,15 +278,11 @@ impl SystemController{
 
 
             let tcp_at_curr = Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous();
-            let cam_at_curr = tcp_at_curr * T_STCP_LC *  T_LC_CAM[i];
+            let cam_at_curr = tcp_at_curr * T_NOTOOL_LC *  T_LC_CAM[i];
 
             //Calculate the transformation from the calibration frame to the current camera frame
             let T_calib_curr= cam_at_calib.try_inverse().unwrap() * cam_at_curr;
             
-
-
-            println!("{}", calib_pos_m);
-            println!("{}", curr_pos_m);
 
 
             println!("cam delta to calibration cam pos: {}", T_calib_curr);
