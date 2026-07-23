@@ -239,7 +239,8 @@ impl SystemController{
                 Quaternion::new(calib_ori[0], calib_ori[1], calib_ori[2], calib_ori[3])
             ).normalize();
 
-            let tcp_at_calib = (Translation3::from(calib_pos_m).to_homogeneous() * q_calib.to_homogeneous());
+            let tcp_at_calib = Translation3::from(calib_pos_m).to_homogeneous() * q_calib.coords.to_homogeneous();
+        
             let cam_at_calib =   tcp_at_calib * T_STCP_LC *  T_CAM_LC[i].try_inverse().unwrap();
 
             //Calculate the cameras current position
@@ -249,7 +250,7 @@ impl SystemController{
             ).normalize();
 
 
-            let tcp_at_curr = Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous();
+            let tcp_at_curr = Translation3::from(curr_pos_m).to_homogeneous() * q_curr.coords.to_homogeneous();
             let cam_at_curr = tcp_at_curr * T_STCP_LC *  T_CAM_LC[i].try_inverse().unwrap();
 
             //Calculate the transformation from the calibration frame to the current camera frame
