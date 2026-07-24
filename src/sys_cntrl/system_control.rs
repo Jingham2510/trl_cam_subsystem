@@ -375,7 +375,7 @@ impl SystemController{
                             self.workspace_transform(&mut pcl_list);    
 
                             if PCL_DEBUG{
-                                for pcl in pcl_list{
+                                for pcl in &pcl_list{
                                     let fp = format!("out/pcl_{}", pcl_cnt);
                                     pcl.save_to_file(&fp);
                                     pcl_cnt += 1;
