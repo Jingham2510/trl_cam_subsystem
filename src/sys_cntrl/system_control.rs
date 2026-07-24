@@ -305,7 +305,7 @@ impl SystemController{
     pub fn auto_map_start(&mut self) -> Result<(), anyhow::Error>{
         println!(">automapping start - WARNING - DO NOT TYPE");
 
-        const PCL_DEBUG :bool = true;
+        const PCL_DEBUG :bool = false;
         let mut pcl_cnt = 0;
 
 
