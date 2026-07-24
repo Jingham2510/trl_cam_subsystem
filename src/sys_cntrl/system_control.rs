@@ -223,8 +223,8 @@ impl SystemController{
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
 
-        //self.curr_pos = [691.62, 2146.64, 1208.36];
-        //self.curr_ori = [0.00311, -0.29709, 0.91777, 0.00319];
+        self.curr_pos = [75.65, 1805.87, 516.47];
+        self.curr_ori = [0.00126, -0.11322, 0.99355, 0.00617];
 
 
         let mut pcl_vec = self.fire_all_cams()?;
@@ -310,6 +310,9 @@ impl SystemController{
     pub fn auto_map_start(&mut self) -> Result<(), anyhow::Error>{
         println!(">automapping start - WARNING - DO NOT TYPE");
 
+        const PCL_DEBUG :bool = true;
+        let mut pcl_cnt = 0;
+
 
         //Create a new network listener
         let mut stream = UdpSocket::bind("0.0.0.0:8080")?;
@@ -370,6 +373,14 @@ impl SystemController{
 
                             //Go through each point cloud and transform it to the work space
                             self.workspace_transform(&mut pcl_list);    
+
+                            if PCL_DEBUG{
+                                for pcl in pcl_list{
+                                    let fp = format!("out/pcl_{}", pcl_cnt);
+                                    pcl.save_to_file(&fp);
+                                    pcl_cnt += 1;
+                                }
+                            }
 
 
                             //Group the pointclouds and turn them into a heightmap - resolution based on desired resolution
