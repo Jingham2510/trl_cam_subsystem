@@ -170,7 +170,10 @@ fn command_handler(mut config_manager : ConfigManager){
 
                     Ok(mut sys_cntrller) =>{
                         println!(">Controller started");
-                        println!("{:?}", sys_cntrller.auto_map_start());
+                        //If the controller crashes
+                        if sys_cntrller.auto_map_start().is_err(){
+                            sys_cntrller.close();
+                        }
 
 
 

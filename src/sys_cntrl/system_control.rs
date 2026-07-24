@@ -190,8 +190,8 @@ impl SystemController{
         }
 
         let mut global_hmap = Heightmap::new(GLOBAL_HMAP_WIDTH, GLOBAL_HMAP_HEIGHT);
-        global_hmap.set_lower_coord_bounds([-1.5, -1.5]);
-        global_hmap.set_upper_coord_bounds([1.5, 1.5]);
+        global_hmap.set_lower_coord_bounds([-0.3, -0.3]);
+        global_hmap.set_upper_coord_bounds([1.1, 1.1]);
         global_hmap.set_all_cells(f32::NAN);
 
 
@@ -540,6 +540,20 @@ impl SystemController{
     pub fn reset_hardware() -> Result<(), anyhow::Error>{
         RealsenseCam::reset_all()
     }
+
+
+    //Close the system - attempt to disconnect safely - consume self as well
+    pub fn close(mut self) -> Result<(), anyhow::Error>{
+        
+        //Drop the camera resources and hope that the system handles that properly
+        for cam in self.cameras{
+            drop(cam);
+        }
+
+        Ok(())
+    }
+
+
 
 
 
