@@ -222,9 +222,6 @@ impl SystemController{
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
 
-        self.curr_pos = [383.93, 2125.99, 487.92];
-        self.curr_ori = [0.12830, 0.67146, 0.72554, 0.07923];
-
 
         let mut pcl_vec = self.fire_all_cams()?;
 
@@ -255,7 +252,6 @@ impl SystemController{
             let calib_ori = OG_ORI_LIST[i];
 
 
-
             //THIS IS THE PROBLEM----------------------- as the calibration pose is correct
 
             // Positions in metres
@@ -284,7 +280,7 @@ impl SystemController{
             
 
 
-            println!("cam delta to calibration cam pos: {}", T_calib_curr);
+            //println!("cam delta to calibration cam pos: {}", T_calib_curr);
 
             //--------------------
         
@@ -294,7 +290,7 @@ impl SystemController{
 
             let T_world_curr =   T_WORLD_CALIB[i] * T_calib_curr;
 
-            println!("Final transform: {}", T_world_curr);
+            //println!("Final transform: {}", T_world_curr);
 
 
             pcl.transform_with(&T_world_curr);         
