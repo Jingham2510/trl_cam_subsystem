@@ -39,10 +39,10 @@ pub struct SystemController{
 const HMAP_FP : &str = "/home/trl/Desktop/global";
 
 
-//Heightmap size controllers - hmap size based on a resolution of 0.0015m over a space of 1.5m?
-const HMAP_RES : f32 = 0.0015;
-const GLOBAL_AREA_WIDTH : f32 = 1.5;
-const GLOBAL_AREA_HEIGHT : f32 = 1.5;
+//Heightmap size controllers - hmap size based on a resolution of 0.0010m over a space of 1.25m?
+const HMAP_RES : f32 = 0.00125;
+const GLOBAL_AREA_WIDTH : f32 = 1.25;
+const GLOBAL_AREA_HEIGHT : f32 = 1.25;
 
 
 const GLOBAL_HMAP_WIDTH : usize = (GLOBAL_AREA_WIDTH / HMAP_RES) as usize;
@@ -190,8 +190,8 @@ impl SystemController{
         }
 
         let mut global_hmap = Heightmap::new(GLOBAL_HMAP_WIDTH, GLOBAL_HMAP_HEIGHT);
-        global_hmap.set_lower_coord_bounds([-0.3, -0.3]);
-        global_hmap.set_upper_coord_bounds([1.1, 1.1]);
+        global_hmap.set_lower_coord_bounds([-0.25, -0.25]);
+        global_hmap.set_upper_coord_bounds([1.0, 1.0]);
         global_hmap.set_all_cells(f32::NAN);
 
 
@@ -220,9 +220,6 @@ impl SystemController{
 
     ///Fire all the cameras and perform the workplace transform on each of them
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
-
-        self.curr_pos = [307.15, 2259.70, 0.74];
-        self.curr_ori = [0.00128, -0.11328, 0.99354, 0.00624];
 
 
         let mut pcl_vec = self.fire_all_cams()?;
