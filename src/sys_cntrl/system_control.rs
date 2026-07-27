@@ -191,7 +191,7 @@ impl SystemController{
 
         let mut global_hmap = Heightmap::new(GLOBAL_HMAP_WIDTH, GLOBAL_HMAP_HEIGHT);
         global_hmap.set_lower_coord_bounds([-0.3, -0.3]);
-        global_hmap.set_upper_coord_bounds([0.8, 0.8]);
+        global_hmap.set_upper_coord_bounds([0.75, 0.85]);
         global_hmap.set_all_cells(f32::NAN);
 
 
