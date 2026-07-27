@@ -148,9 +148,9 @@ const T_NOTOOL_LC: Matrix4<f32> =  matrix![1.0, 0.0, 0.0, 0.0;
 
 
 //Default croppings for each camera
-const FRONT_SPOKE_CROP : [f32;6] = [-999.0, 999.0, -999.0, 999.0, -999.0, 999.0];
-const BACK_SPOKE_L_CROP : [f32;6] = [-999.0, 999.0, -999.0, 999.0, -999.0, 999.0];
-const BACK_SPOKE_R_CROP : [f32;6] = [-999.0, 999.0, -999.0, 999.0, -999.0, 999.0];
+const FRONT_SPOKE_CROP : [f32;6] = [-0.5, 0.5, -0.5, 0.5, -999.0, 999.0];
+const BACK_SPOKE_L_CROP : [f32;6] = [-0.5, 0.5, -0.5, 0.5, -999.0, 999.0];
+const BACK_SPOKE_R_CROP : [f32;6] = [-0.5, 0.5, -0.5, 0.5, -999.0, 999.0];
 
 const CROP_LIST : [[f32;6];3] = [FRONT_SPOKE_CROP, BACK_SPOKE_L_CROP, BACK_SPOKE_R_CROP];
 
@@ -221,11 +221,17 @@ impl SystemController{
     ///Fire all the cameras and perform the workplace transform on each of them
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
+        self.curr_pos = [665.30, 1862.97, 222.31];
+        self.curr_ori = [0.00126, -0.11326, 0.99355, 0.00619];
 
 
         let mut pcl_vec = self.fire_all_cams()?;
 
+        self.standard_crop(&mut pcl_vec);
+
         self.workspace_transform(&mut pcl_vec);
+
+
      
         Ok(pcl_vec)
 
