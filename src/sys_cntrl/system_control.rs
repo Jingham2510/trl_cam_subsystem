@@ -221,8 +221,8 @@ impl SystemController{
     ///Fire all the cameras and perform the workplace transform on each of them
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
-        self.curr_pos = [665.30, 1862.97, 222.31];
-        self.curr_ori = [0.00126, -0.11326, 0.99355, 0.00619];
+        self.curr_pos = [307.15, 2259.70, 0.74];
+        self.curr_ori = [0.00128, -0.11328, 0.99354, 0.00624];
 
 
         let mut pcl_vec = self.fire_all_cams()?;
