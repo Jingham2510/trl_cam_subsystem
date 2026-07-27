@@ -87,27 +87,7 @@ const T_WORLD_CALIB : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM , BACK_SPOKE_L_
 
 
 
-///FORCE SENSOR TO CAMERA TRANSFORMS - DEFINED IN THE TCP FRAME - CAD FORMULATED
-/*
-const FORCE_TO_FRONT_CAM : Matrix4<f32> = matrix![1.0,  0.0,  0.0, 0.0;
-                                                0.0000000, -0.9396926, -0.3420202, 0.30414;
-                                                0.0000000,  0.3420202, -0.9396926, 0.06813;
-                                                0.0, 0.0, 0.0, 1.0];
 
-
-const FORCE_TO_BL_CAM: Matrix4<f32> = matrix![0.5000000,  0.8660254,  0.0000000, 0.26381;
-                                            0.8137977, -0.4698463,  0.3420202, -0.15275;
-                                            0.2961981, -0.1710101, -0.9396926, 0.06813;
-                                            0.0, 0.0, 0.0, 1.0];
-
-
-
-const FORCE_TO_BR_CAM : Matrix4<f32> = matrix![0.5000000, -0.8660254,  0.0000000, -0.26377;
-                                                -0.8137977, -0.4698463,  0.3420202, -0.15275;
-                                                -0.2961981, -0.1710101, -0.9396926, 0.06813;
-                                                0.0, 0.0, 0.0, 1.0];
-
-*/
 
 ///FORCE SENSOR TO CAMERA TRANSFORMS - DEFINED IN THE TCP FRAME -opencv calced
 
@@ -144,6 +124,26 @@ const T_NOTOOL_LC: Matrix4<f32> =  matrix![1.0, 0.0, 0.0, 0.0;
                                                             0.0, 1.0, 0.0, 0.0;
                                                             0.0, 0.0, 1.0, 0.0;
                                                             0.0, 0.0, 0.0, 1.0];
+
+
+
+///Hand-fine tuned last touches - calibed to the front pointcloud
+const FRONT_FINE_TUNE : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
+                                               0.0, 1.0, 0.0, 0.0;
+                                               0.0, 0.0, 1.0, 0.0;
+                                               0.0, 0.0, 0.0, 1.0];
+
+const BL_FINE_TUNE : Matrix4<f32> = matrix![0.992756, 0.000000, 0.120145, 0.050853;
+                                            0.000000, 1.000000, 0.000000, -0.046038;
+                                            -0.120145, 0.000000, 0.992756, 0.022551;
+                                            0.000000, 0.000000, 0.000000, 1.000000];
+
+const BR_FINE_TUNE : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.001842;
+                                               0.0, 1.0, 0.0, -0.027963;
+                                               0.0, 0.0, 1.0, 0.021427;
+                                               0.0, 0.0, 0.0, 1.0];
+
+const FINE_TUNES:[Matrix4<f32>; 3] = [FRONT_FINE_TUNE, BL_FINE_TUNE, BR_FINE_TUNE];
 
 
 
@@ -294,7 +294,7 @@ impl SystemController{
             //The camera space is calculated by doing a rigid transformation from the tcp position/orientation to the position of the camera
         
 
-            let T_world_curr =   T_WORLD_CALIB[i] * T_calib_curr;
+            let T_world_curr =   FINE_TUNES[i] * T_WORLD_CALIB[i] * T_calib_curr;
 
             //println!("Final transform: {}", T_world_curr);
 
