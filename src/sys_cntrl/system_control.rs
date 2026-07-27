@@ -39,10 +39,10 @@ pub struct SystemController{
 const HMAP_FP : &str = "/home/trl/Desktop/global";
 
 
-//Heightmap size controllers - hmap size based on a resolution of 0.0010m over a space of 1.25m?
-const HMAP_RES : f32 = 0.00125;
-const GLOBAL_AREA_WIDTH : f32 = 1.25;
-const GLOBAL_AREA_HEIGHT : f32 = 1.25;
+//Heightmap size controllers - hmap size based on a resolution of 0.0010m over a space of 1m?
+const HMAP_RES : f32 = 0.001;
+const GLOBAL_AREA_WIDTH : f32 = 1.0;
+const GLOBAL_AREA_HEIGHT : f32 = 1.0;
 
 
 const GLOBAL_HMAP_WIDTH : usize = (GLOBAL_AREA_WIDTH / HMAP_RES) as usize;
@@ -190,7 +190,7 @@ impl SystemController{
         }
 
         let mut global_hmap = Heightmap::new(GLOBAL_HMAP_WIDTH, GLOBAL_HMAP_HEIGHT);
-        global_hmap.set_lower_coord_bounds([-0.25, -0.25]);
+        global_hmap.set_lower_coord_bounds([0.0, 0.0]);
         global_hmap.set_upper_coord_bounds([1.0, 1.0]);
         global_hmap.set_all_cells(f32::NAN);
 
