@@ -54,35 +54,33 @@ const GLOBAL_HMAP_HEIGHT : usize = (GLOBAL_AREA_HEIGHT / HMAP_RES) as usize;
 
 //CALIB POS TO WORLD TRANSFORM -----------------
 
-const FRONT_SPOKE_POS : [f32; 3] = [396.02, 2539.15, 1347.70];
-const FRONT_SPOKE_ORI : [f32; 4] = [0.00128, -0.11323, 0.99355, 0.00628];
-const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![0.99772996, -0.030186119, -0.060197674,   0.39343914;
-                                                    0.053487673,    0.8983324,    0.4360481,  -0.26534083;
-                                                    0.040914923,   -0.4382781,   0.89790773,   -1.3016539;
-                                                    0.0,          0.0,          0.0,          1.    ];
+///NEW TRANSFORMS
+const CALIB_POS : [f32;3] = [121.04, 2446.29, 248.80];
+const CALIB_ORI : [f32; 4] = [0.00317, -0.17772, 0.98399, 0.01286];
+
+
+const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![ 0.9998314,  -0.00798137, -0.01653686,  0.22178532;
+                                                     0.01464439,  0.88990805,  0.45590481, -0.09734951;
+                                                     0.01107754, -0.45607012,  0.8898749,  -0.57943091;
+                                                     0.        ,  0.        ,  0.       ,   1.        ];
 
 
 
 
 
-const BACK_SPOKE_L_POS : [f32; 3] = [250.29, 2206.10, 1470.51];
-const BACK_SPOKE_L_ORI : [f32; 4] = [0.00251, 0.08842, 0.99606, 0.00595];
-const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![-0.010600714,  -0.96143806,    0.2748172,  -0.03968785;
-                                                      0.9995037, -0.018341642, -0.025613029,   0.37003002;
-                                                      0.029665936,   0.27440926,    0.9611553,   -1.4316759;
-                                                      0.0, 0.0, 0.0, 1.0];
+const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![ 0.44983659, -0.80929274,  0.37774636, -0.03133563;
+                                                     0.89303276,  0.40198995, -0.20222899,  0.32980309;
+                                                     0.01181221,  0.42830987,  0.90355472, -0.58459977;
+                                                     0.        ,  0.        ,  0.        ,  1.        ];
 
 
 
-const BACK_SPOKE_R_POS : [f32; 3] = [817.92, 2205.33, 1470.68];
-const BACK_SPOKE_R_ORI : [f32; 4] = [0.00062, 0.39734, -0.91765, -0.00649];
-const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![-0.0077567315,     0.8894256,   -0.45701447,     1.1159229;
-                                                -0.9996761,  -0.017976763,   -0.01801863,    0.41367507;
-                                                -0.024241868,    0.45672664,    0.88927686,     -1.400311;
-                                                0.0, 0.0, 0.0, 1.0];
 
-const OG_POS_LIST : [[f32;3] ;3] = [FRONT_SPOKE_POS, BACK_SPOKE_L_POS, BACK_SPOKE_R_POS];
-const OG_ORI_LIST : [[f32;4] ;3] = [FRONT_SPOKE_ORI, BACK_SPOKE_L_ORI, BACK_SPOKE_R_ORI];
+const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![ 0.50649045,  0.77714794, -0.37350837,  0.49473645;
+                                                    -0.86224487,  0.45595135, -0.22054965,  0.39169167;
+                                                    -0.00109806,  0.43376197,  0.90102683, -0.56863551;
+                                                     0.        ,  0.        ,  0.        ,  1.        ];
+
 const T_WORLD_CALIB : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM , BACK_SPOKE_L_TRANSFORM , BACK_SPOKE_R_TRANSFORM];
 
 
@@ -251,8 +249,8 @@ impl SystemController{
         for (i ,pcl) in pcl_list.iter_mut().enumerate(){  
 
             //Calculate the cameras original position
-            let calib_pos = OG_POS_LIST[i];
-            let calib_ori = OG_ORI_LIST[i];
+            let calib_pos = CALIB_POS;
+            let calib_ori = CALIB_ORI;
 
 
             //THIS IS THE PROBLEM----------------------- as the calibration pose is correct
