@@ -497,7 +497,7 @@ impl SystemController{
                     println!(">{}", extrinsic_inv);
                 }
                 Err(e) =>{
-                    println!("Error - {e}", e);
+                    println!("Error - {e}");
                     println!(">Failed to calc extrinsics for cam");
                 }
             }
