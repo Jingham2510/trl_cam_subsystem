@@ -488,16 +488,21 @@ impl SystemController{
          for (i, image) in img_filepaths.iter().enumerate(){
             println!(">----------CAM: {}-------------", i);
 
-            if let Ok(extrinsic_inv) = get_extrinsic_inv_from_board(&image, &intrinsics[i]){
-                println!(">-----extrinsics-----");
-                println!(">{}", extrinsic_inv.try_inverse().unwrap());
-                
-                println!(">-----inverse extrinsics-----");
-                println!(">{}", extrinsic_inv);
-            }else{
-                println!(">Failed to calc extrinsics for cam");
-            };
+            match get_extrinsic_inv_from_board(&image, &intrinsics[i]){
+                Ok(extrinsic_inv)  =>{                    
+                    println!(">-----extrinsics-----");
+                    println!(">{}", extrinsic_inv.try_inverse().unwrap());
+                    
+                    println!(">-----inverse extrinsics-----");
+                    println!(">{}", extrinsic_inv);
+                }
+                Err(e) =>{
+                    println!("Error - {e}", e);
+                    println!(">Failed to calc extrinsics for cam");
+                }
+            }
 
+        
 
               //If delete is true - delete the images
             if delete_calib_imgs{
@@ -532,10 +537,10 @@ impl SystemController{
         
         //Create each image and label it according to its number in the id
         for cam in self.cameras.iter_mut(){
-            let img_fp = format!("{}_{}", base_filepath, cam.id());            
+            println!("Cam {} firing", cam.id());   
+            let img_fp = format!("{}_{}", base_filepath, cam.id());                     
             filepaths.push(cam.get_colour_image(&img_fp)?);
 
-            println!("Cam {} fired and saved", cam.id());
 
         }
         Ok(filepaths)
