@@ -6,7 +6,7 @@ use rustgeomapping::depth_cam::{CamType, DepthCam};
 use rustgeomapping::data_types::heightmap::Heightmap;
 use rustgeomapping::data_types::pointcloud::PointCloud;
 use rustgeomapping::data_types::intrinsic_info::IntrinsicInfo;
-use rustgeomapping::computer_vision::get_extrinsic_inv_from_aruco_4x4_250;
+use rustgeomapping::computer_vision::{get_extrinsic_inv_from_aruco_4x4_250, get_extrinsic_inv_from_board};
 use crate::config::config_manager::ConfigManager;
 use anyhow::bail;
 use nalgebra::{UnitQuaternion, Quaternion, Vector3, Matrix4, Translation3, matrix};
@@ -439,7 +439,7 @@ impl SystemController{
     ///Calculate inverse extrinsic matrices based on aruco tag captures
     /// Assumes that the cameras are already in the correct position
     /// Also predefined for the board used in the TRL lab
-    pub fn calc_calib_mats(&mut self, delete_calib_imgs : bool) -> Result<(), anyhow::Error>{
+    pub fn calc_calib_mats(&mut self, delete_calib_imgs : bool, pre_def : bool) -> Result<(), anyhow::Error>{
         
         //For each camera get the intrinsic matrix
         let intrinsics = self.get_all_intrinsics()?;
@@ -451,6 +451,7 @@ impl SystemController{
         //For each camera take a colour image
         let img_filepaths = self.fire_all_cams_image(fp)?; 
 
+        if !pre_def{
 
         //ARUCO BOARD SETUP-----------------------------
         //Center to center distance
@@ -480,6 +481,27 @@ impl SystemController{
             }
 
         }
+    }else{
+         for (i, image) in img_filepaths.iter().enumerate(){
+            println!(">----------CAM: {}-------------", i);
+
+            if let Ok(extrinsic_inv) = get_extrinsic_inv_from_board(&image, &intrinsics[i]){
+                println!(">-----extrinsics-----");
+                println!(">{}", extrinsic_inv.try_inverse().unwrap());
+                
+                println!(">-----inverse extrinsics-----");
+                println!(">{}", extrinsic_inv);
+            }else{
+                println!(">Failed to calc extrinsics for cam");
+            };
+
+
+              //If delete is true - delete the images
+            if delete_calib_imgs{
+                fs::remove_file(image)?;
+            }
+        }
+    }
         
       
 

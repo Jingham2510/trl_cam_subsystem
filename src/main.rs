@@ -214,7 +214,7 @@ fn command_handler(mut config_manager : ConfigManager){
                     Ok(mut sys_cntrller) =>{
                         println!(">Getting extrinsics");
 
-                        println!("{:?}", sys_cntrller.calc_calib_mats(false));
+                        println!("{:?}", sys_cntrller.calc_calib_mats(false, true));
 
                     }
                     Err(e) =>{
