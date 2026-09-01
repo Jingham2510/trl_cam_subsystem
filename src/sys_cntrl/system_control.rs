@@ -482,6 +482,9 @@ impl SystemController{
 
         }
     }else{
+
+        println!("Predefined board -- (calib.io)");
+
          for (i, image) in img_filepaths.iter().enumerate(){
             println!(">----------CAM: {}-------------", i);
 
