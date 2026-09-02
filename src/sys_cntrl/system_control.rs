@@ -266,7 +266,7 @@ impl SystemController{
 
 
             self.curr_pos = [234.30, 2115.46, 563.39];
-            self.ori = [0.18917, -0.05255, 0.98051, -0.00653]
+            self.curr_ori = [0.18917, -0.05255, 0.98051, -0.00653];
 
 
             //Calculate the cameras current position
