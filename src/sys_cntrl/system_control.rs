@@ -265,8 +265,8 @@ impl SystemController{
             let cam_at_calib =   tcp_at_calib *  T_STCP_LC   *  T_LC_CAM[i];
 
 
-            println!("{:?}", tcp_at_calib);
-            println!("{:?}", cam_at_calib);
+            self.curr_pos = [234.30, 2115.46, 563.39];
+            self.ori = [0.18917, -0.05255, 0.98051, -0.00653]
 
 
             //Calculate the cameras current position
