@@ -260,7 +260,7 @@ impl SystemController{
                 Quaternion::new(CALIB_ORI[0], CALIB_ORI[1], CALIB_ORI[2], CALIB_ORI[3])
             );
 
-            println!("{:?}". calib_pos_m);
+            println!("{:?}", calib_pos_m);
             println!("{:?}", q_calib);
 
             let tcp_at_calib = Translation3::from(calib_pos_m).to_homogeneous() * q_calib.to_homogeneous();
