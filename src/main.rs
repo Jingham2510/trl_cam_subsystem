@@ -243,9 +243,14 @@ fn command_handler(mut config_manager : ConfigManager){
 
                         //let pcls = sys_cntrller.fire_all_cams().unwrap();
 
-                         if pcls[0].points().contains(&[f32::NAN, f32::NAN, f32::NAN]){
-                                println!("NAN");
+                        for pcl in pcls{
+                            for point in pcl.points(){
+                                if point.contains(&f32::NAN){
+                                    println!("NAN");
+                                }
+                            }
                         }
+
 
                         let mut i = 0;
 
