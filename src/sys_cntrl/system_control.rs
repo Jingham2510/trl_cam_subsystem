@@ -223,13 +223,13 @@ impl SystemController{
 
         let mut pcl_vec = self.fire_all_cams()?;
 
-        self.standard_crop(&mut pcl_vec);
+        self.standard_crop(&mut pcl_vec);        
+
+        self.workspace_transform(&mut pcl_vec);
 
         if pcl_vec[0].points().contains(&[f32::NAN, f32::NAN, f32::NAN]){
             println!("NAN");
         }
-
-        self.workspace_transform(&mut pcl_vec);
 
 
      
