@@ -260,12 +260,14 @@ impl SystemController{
                 Quaternion::new(CALIB_ORI[0], CALIB_ORI[1], CALIB_ORI[2], CALIB_ORI[3])
             );
 
-            println!("{:?}", calib_pos_m);
-            println!("{:?}", q_calib);
-
             let tcp_at_calib = Translation3::from(calib_pos_m).to_homogeneous() * q_calib.to_homogeneous();
         
             let cam_at_calib =   tcp_at_calib *  T_STCP_LC   *  T_LC_CAM[i];
+
+
+            println!("{:?}", tcp_at_calib);
+            println!("{:?}", cam_at_calib);
+
 
             //Calculate the cameras current position
             let curr_pos_m = Vector3::new(self.curr_pos[0], self.curr_pos[1], self.curr_pos[2]) / 1000.0;
