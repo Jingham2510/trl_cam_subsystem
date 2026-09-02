@@ -141,7 +141,7 @@ const BR_FINE_TUNE : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
                                                0.0, 1.0, 0.0, 0.0;
                                                0.0, 0.0, 1.0, 0.0;
                                                0.0, 0.0, 0.0, 1.0];
-                                               
+
 const FINE_TUNES:[Matrix4<f32>; 3] = [FRONT_FINE_TUNE, BL_FINE_TUNE, BR_FINE_TUNE];
 
 
@@ -249,18 +249,13 @@ impl SystemController{
 
         for (i ,pcl) in pcl_list.iter_mut().enumerate(){  
 
-            //Calculate the cameras original position
-            let calib_pos = CALIB_POS;
-            let calib_ori = CALIB_ORI;
-
-
-            //THIS IS THE PROBLEM----------------------- as the calibration pose is correct
+    
 
             // Positions in metres
-            let calib_pos_m = Vector3::new(calib_pos[0], calib_pos[1], calib_pos[2]) / 1000.0;
+            let calib_pos_m = Vector3::new(CALIB_POS[0], CALIB_POS[1], CALIB_POS[2]) / 1000.0;
             //Create the original quaternion
             let q_calib = UnitQuaternion::from_quaternion(
-                Quaternion::new(calib_ori[0], calib_ori[1], calib_ori[2], calib_ori[3])
+                Quaternion::new(CALIB_ORI[0], CALIB_ORI[1], CALIB_ORI[2], CALIB_ORI[3])
             );
 
             let tcp_at_calib = Translation3::from(calib_pos_m).to_homogeneous() * q_calib.to_homogeneous();
