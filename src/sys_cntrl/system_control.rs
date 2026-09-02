@@ -227,9 +227,7 @@ impl SystemController{
 
         self.workspace_transform(&mut pcl_vec);
 
-        if pcl_vec[0].points().contains(&[f32::NAN, f32::NAN, f32::NAN]){
-            println!("NAN");
-        }
+       
 
 
      
