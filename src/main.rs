@@ -238,21 +238,17 @@ fn command_handler(mut config_manager : ConfigManager){
 
                         println!("Firing all");
 
+                        sys_cntrller.po = [234.30, 2115.46, 563.39];
+                        self.curr_ori = [0.18917, -0.05255, 0.98051, -0.00653];
+
                         
                         let pcls = sys_cntrller.fire_and_transform().unwrap();
-
-                        //let pcls = sys_cntrller.fire_all_cams().unwrap();
 
                         
                 
                         let mut i = 0;
-                        /*
-
-                        for pcl in pcls{
-                            pcl.save_to_file(&format!("out/pcl_{i}"));
-			                i += 1;
-                        }
-                        */
+                       
+                        
 
                         
 

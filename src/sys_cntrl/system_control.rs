@@ -220,6 +220,8 @@ impl SystemController{
     ///Fire all the cameras and perform the workplace transform on each of them
     pub fn fire_and_transform(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
+          self.curr_pos = [234.30, 2115.46, 563.39];
+                        self.curr_ori = [0.18917, -0.05255, 0.98051, -0.00653];
 
         let mut pcl_vec = self.fire_all_cams()?;
 
@@ -265,8 +267,7 @@ impl SystemController{
             let cam_at_calib =   tcp_at_calib *  T_STCP_LC   *  T_LC_CAM[i];
 
 
-            self.curr_pos = [234.30, 2115.46, 563.39];
-            self.curr_ori = [0.18917, -0.05255, 0.98051, -0.00653];
+            
 
 
             //Calculate the cameras current position
