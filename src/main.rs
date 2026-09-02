@@ -244,15 +244,7 @@ fn command_handler(mut config_manager : ConfigManager){
                         //let pcls = sys_cntrller.fire_all_cams().unwrap();
 
                         
-                        for pcl in pcls{
-                            for point in pcl.points(){
-                                if point[0].is_nan(){
-                                    println!("NAN");
-                                }
-                            }
-                        }
-
-
+                
                         let mut i = 0;
                         /*
 
