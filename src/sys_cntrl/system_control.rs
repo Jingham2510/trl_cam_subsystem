@@ -58,10 +58,11 @@ const GLOBAL_HMAP_HEIGHT : usize = (GLOBAL_AREA_HEIGHT / HMAP_RES) as usize;
 const CALIB_POS : [f32;3] = [121.04, 2446.29, 248.80];
 const CALIB_ORI : [f32; 4] = [0.00317, -0.17772, 0.98399, 0.01286];
 
+//Added 5cm of height to each transform to properly place in the sandbed
 
 const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![ 0.9998314,  -0.00798137, -0.01653686,  0.22178532;
                                                      0.01464439,  0.88990805,  0.45590481, -0.09734951;
-                                                     0.01107754, -0.45607012,  0.8898749,  -0.57943091;
+                                                     0.01107754, -0.45607012,  0.8898749,  -0.62943091;
                                                      0.        ,  0.        ,  0.       ,   1.        ];
 
 
@@ -70,7 +71,7 @@ const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![ 0.9998314,  -0.00798137, -
 
 const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![ 0.44983659, -0.80929274,  0.37774636, -0.03133563;
                                                      0.89303276,  0.40198995, -0.20222899,  0.32980309;
-                                                     0.01181221,  0.42830987,  0.90355472, -0.58459977;
+                                                     0.01181221,  0.42830987,  0.90355472, -0.63459977;
                                                      0.        ,  0.        ,  0.        ,  1.        ];
 
 
@@ -78,7 +79,7 @@ const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![ 0.44983659, -0.80929274, 
 
 const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![ 0.50649045,  0.77714794, -0.37350837,  0.49473645;
                                                     -0.86224487,  0.45595135, -0.22054965,  0.39169167;
-                                                    -0.00109806,  0.43376197,  0.90102683, -0.56863551;
+                                                    -0.00109806,  0.43376197,  0.90102683, -0.61863551;
                                                      0.        ,  0.        ,  0.        ,  1.        ];
 
 const T_WORLD_CALIB : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM , BACK_SPOKE_L_TRANSFORM , BACK_SPOKE_R_TRANSFORM];
@@ -112,7 +113,7 @@ const T_LC_CAM :[Matrix4<f32>; 3] = [FORCE_TO_FRONT_CAM, FORCE_TO_BL_CAM, FORCE_
 
 
 ///TCP POINT TO FORCE SENSOR POINT TRANSFORM - DEFINED IN THE CURRENT TCP FRAME
-/// USE FC TO TCP DO NOT MATCH THE TCP SPECIFIED IN RAPID
+/// MEASURE FROM THE FORCE SENSOR TO TCP DO NOT MATCH THE TCP SPECIFIED IN RAPID
 const T_STCP_LC : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
                                                             0.0, 1.0, 0.0, 0.0;
                                                             0.0, 0.0, 1.0, 0.45;
@@ -131,16 +132,16 @@ const FRONT_FINE_TUNE : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
                                                0.0, 0.0, 1.0, 0.0;
                                                0.0, 0.0, 0.0, 1.0];
 
-const BL_FINE_TUNE : Matrix4<f32> = matrix![0.992756, 0.000000, 0.120145, 0.050853;
-                                            0.000000, 1.000000, 0.000000, -0.046038;
-                                            -0.120145, 0.000000, 0.992756, 0.022551;
-                                            0.000000, 0.000000, 0.000000, 1.000000];
-
-const BR_FINE_TUNE : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.001842;
-                                               0.0, 1.0, 0.0, -0.027963;
-                                               0.0, 0.0, 1.0, 0.021427;
+const BL_FINE_TUNE : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
+                                               0.0, 1.0, 0.0, 0.0;
+                                               0.0, 0.0, 1.0, 0.0;
                                                0.0, 0.0, 0.0, 1.0];
 
+const BR_FINE_TUNE : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
+                                               0.0, 1.0, 0.0, 0.0;
+                                               0.0, 0.0, 1.0, 0.0;
+                                               0.0, 0.0, 0.0, 1.0];
+                                               
 const FINE_TUNES:[Matrix4<f32>; 3] = [FRONT_FINE_TUNE, BL_FINE_TUNE, BR_FINE_TUNE];
 
 
