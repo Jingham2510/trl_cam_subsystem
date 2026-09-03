@@ -11,6 +11,7 @@ use crate::config::config_manager::ConfigManager;
 use anyhow::bail;
 use nalgebra::{UnitQuaternion, Quaternion, Vector3, Matrix4, Translation3, matrix};
 
+use std::cell::RefCell;
 use std::io::{Read, stdin};
 use std::process::exit;
 use std::net::UdpSocket;
@@ -22,6 +23,8 @@ use std::{thread};
 
 
 use tracing::{info, debug};
+
+const SERIAL : bool = true;
 
 
 pub struct SystemController{
@@ -337,6 +340,22 @@ impl SystemController{
     pub fn auto_map_start(&mut self) -> Result<(), anyhow::Error>{
         println!(">automapping start - WARNING - DO NOT TYPE");
 
+                
+        //If non-serial mode create the camera threads
+        let (threads, triggers, outs) : (Vec<CamThread<RealsenseCam>>, Vec<Sender<bool>>, Vec<Reciever<PointCloud>>) = if !SERIAL{
+
+            let threads : Vec<CamThread<RealsenseCam>> = vec![];
+            let triggers : Vec<Sender<Bool>> = vec![];
+            let outs : Vec<Reciever<PointClouds>> = vec![];
+
+            for cam in self.cameras{
+                threads.append(CamThread::prepare(RefCell::new(CamType), &cam.id()))
+            }
+
+
+            (threads, triggers, outs)
+        };
+
 
         info!("Auto mapping started");
 
@@ -362,6 +381,9 @@ impl SystemController{
                 break;
              }
         }
+
+
+
         
         //Do until main system instructs to stop
         loop{           
@@ -396,9 +418,17 @@ impl SystemController{
                         }else{
                             //Only fire all cameras if the main system has sent a pos string - stops the and doesnt risk file being read while incomplete                      
                        
+                            if SERIAL{
+                                //Fire all cameras
+                                let mut pcl_list = self.fire_all_cams()?;
+                            }else{
+                                //Trigger the cameras and wait for each to respond
 
-                            //Fire all cameras
-                            let mut pcl_list = self.fire_all_cams()?;
+
+
+                            }
+
+
 
                             //Crop the point cloud
                             self.standard_crop(&mut pcl_list);
