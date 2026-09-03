@@ -10,16 +10,18 @@ use rustgeomapping::computer_vision::{get_extrinsic_inv_from_aruco_4x4_250, get_
 use crate::config::config_manager::ConfigManager;
 use anyhow::bail;
 use nalgebra::{UnitQuaternion, Quaternion, Vector3, Matrix4, Translation3, matrix};
+
 use std::io::{Read, stdin};
 use std::process::exit;
 use std::net::UdpSocket;
 use std::{any, fs};
-
-
+use std::fs::OpenOptions;
 use std::time::{SystemTime, Duration};
-
 use std::ops::{Index, Mul};
 use std::{thread};
+
+
+use tracing::{info, debug};
 
 
 pub struct SystemController{
@@ -159,13 +161,29 @@ impl SystemController{
     ///Starts the system, taking control away from the user
     pub fn start_system_control(config : &mut ConfigManager) -> Result<Self, anyhow::Error>{
 
-        
+        //Create a blank logging file in the output (or overwrite the previous log if it exists)
+        let log_file = OpenOptions::new()
+            .create(true)
+            .write(true)
+            .open("out/log.log")
+            .unwrap();
+
+        //Start the logging tool
+        tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::DEBUG)
+        .with_target(false)
+        .with_writer(log_file)
+        .init();
+
+        info!("Logging started");
 
         println!(">Starting system control - no longer accepting typed user input");
         println!(">GLOBAL WIDTH:{} GLOBAL HEIGHT:{}", GLOBAL_HMAP_WIDTH, GLOBAL_HMAP_WIDTH);
 
         //Update the config - not required by the system as it won't be updated while the system is alive
         config.update();
+
+        info!("Config updated");
 
         //Check to make sure there are cameras to connect to 
         let no_of_cams = config.no_of_cams();        
@@ -188,10 +206,14 @@ impl SystemController{
             }
         }
 
+        info!("{} cams detected", realsense_cnt);
+
         let mut global_hmap = Heightmap::new(GLOBAL_HMAP_WIDTH, GLOBAL_HMAP_HEIGHT);
         global_hmap.set_lower_coord_bounds([-0.17, -0.09]);
         global_hmap.set_upper_coord_bounds([0.90, 0.92]);
         global_hmap.set_all_cells(f32::NAN);
+
+        info("Global heightmap created");
 
 
         Ok(SystemController{
@@ -205,15 +227,18 @@ impl SystemController{
 
     ///Fire all of the depth cameras the system controls and saves the pointclouds
     pub fn fire_all_cams(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
+
+        info!("Cams firing");
     
         let mut pcl_vec : Vec<PointCloud> = vec![];
 
-        for (i, cam) in self.cameras.iter_mut().enumerate(){   
-
+        for (i, cam) in self.cameras.iter_mut().enumerate(){  
             
             pcl_vec.push(cam.take_pcl()?);
         }
      
+        info!("Cams fired");
+
         Ok(pcl_vec)
     }
 
@@ -226,9 +251,7 @@ impl SystemController{
 
         self.standard_crop(&mut pcl_vec);        
 
-        self.workspace_transform(&mut pcl_vec);
-
-       
+        self.workspace_transform(&mut pcl_vec);      
 
 
      
@@ -244,6 +267,8 @@ impl SystemController{
             let crop = CROP_LIST[i];
             pcl.crop(crop[0], crop[1], crop[2], crop[3], crop[4], crop[5]);
         }
+
+        info!("Pointclouds cropped")
 
     }
 
@@ -302,12 +327,18 @@ impl SystemController{
             
 
         }
+
+        info!("Pointclouds transformed")
+
     }
 
 
     ///Runs the autonomous mapping control loop
     pub fn auto_map_start(&mut self) -> Result<(), anyhow::Error>{
         println!(">automapping start - WARNING - DO NOT TYPE");
+
+
+        info!("Auto mapping started");
 
         const PCL_DEBUG :bool = false;
         let mut pcl_cnt = 0;
@@ -316,6 +347,8 @@ impl SystemController{
         //Create a new network listener
         let mut stream = UdpSocket::bind("0.0.0.0:8080")?;
         stream.connect("192.168.55.100:8080")?;
+
+        info!("Output socket connected");
 
         let mut buf : [u8; 10] = [0;10]; 
 
@@ -384,17 +417,30 @@ impl SystemController{
 
                             //Group the pointclouds and turn them into a heightmap - resolution based on desired resolution
                             let local_hmap = Heightmap::create_from_pcl_list_with_res(pcl_list, HMAP_RES)?;
+                            info!("Local heightmap created");
+
                             //local_hmap.save_to_file("/home/trl/Desktop/local");
                             
                             //Slot the heightmap into the global heightmap
-                            self.global_hmap.update_section(local_hmap)?;
+                            let hmap_updated = self.global_hmap.update_section(local_hmap);
+
+                            match hmap_updated{
+                                Ok(_) =>{
+                                    info!("Global heightmap updated");
+                                }
+
+                                Err(e) =>{
+                                    error!("Failed to update heightmap - {}", e)
+                                }
+                            }
+
+                            
 
 
                             //Update the current heightmap file
                             //self.global_hmap.save_to_file(HMAP_FP)?;
 
-                            let flattened_cells = self.global_hmap.get_flattened_cells()?;
-                            
+                            let flattened_cells = self.global_hmap.get_flattened_cells()?;                            
                             //Turn the list of floats into a list of bytes
                             let bytes : Vec<u8> = flattened_cells.into_iter().flat_map(|i| i.to_be_bytes()).collect();
 
@@ -403,6 +449,8 @@ impl SystemController{
                             let no_of_packets =bytes.len()/PACKET_SIZE;
 
                             stream.send(&format!("{}", no_of_packets).into_bytes())?;
+
+                            info!("Number of packets communicated to host pc");
 
                             for i in 0..no_of_packets{
                                 if i == no_of_packets{
@@ -422,6 +470,8 @@ impl SystemController{
 
                                 }
                             }
+
+                            info!("Packets sent");
                             
 
                         };  

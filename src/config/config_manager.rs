@@ -77,7 +77,6 @@ impl ConfigManager{
         self.date = SystemTime::now().into();
         self.cams = cams;
         self.dev_cnt = dev_cnt;
-
     }
 
 
