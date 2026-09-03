@@ -15,11 +15,16 @@ use std::cell::RefCell;
 use std::io::{Read, stdin};
 use std::process::exit;
 use std::net::UdpSocket;
+use std::sync::mpsc;
 use std::{any, fs};
 use std::fs::OpenOptions;
 use std::time::{SystemTime, Duration};
 use std::ops::{Index, Mul};
 use std::{thread};
+
+use std::sync::mpsc::{Receiver, Sender};
+
+use crate::sys_cntrl::cam_thread;
 
 
 use tracing::{info, debug};
@@ -342,18 +347,27 @@ impl SystemController{
 
                 
         //If non-serial mode create the camera threads
-        let (threads, triggers, outs) : (Vec<CamThread<RealsenseCam>>, Vec<Sender<bool>>, Vec<Reciever<PointCloud>>) = if !SERIAL{
+        let (threads, triggers, outs) : Option<(Vec<CamThread>, Vec<Sender<bool>>, Vec<Reciever<PointCloud>>)> = if !SERIAL{
 
-            let threads : Vec<CamThread<RealsenseCam>> = vec![];
+            let threads : Vec<CamThread> = vec![];
             let triggers : Vec<Sender<Bool>> = vec![];
-            let outs : Vec<Reciever<PointClouds>> = vec![];
+            let outs : Vec<Reciever<PointCloud>> = vec![];
 
             for cam in self.cameras{
-                threads.append(CamThread::prepare(RefCell::new(CamType), &cam.id()))
+
+                let new_trigger : (Sender<bool>, Reciever<bool>) = mpsc::channel();
+                let new_out : (Sender<PointCloud>, Reciever<PointCloud>) = mpsc::channel();
+
+                triggers.push(new_trigger.0);
+                outs.push(new_out.1);
+
+                threads.append(CamThread::prepare(RefCell::new(cam), &cam.id(), trigger.0, new_out.1));
             }
 
-
-            (threads, triggers, outs)
+            Option::from((threads, triggers, outs))
+        }else{
+            //Otherwise just create a bunch of empty vectors that will go unused (probably inefficient)
+            Option::None
         };
 
 
