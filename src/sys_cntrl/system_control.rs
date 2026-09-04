@@ -384,8 +384,11 @@ impl SystemController{
 
         info!("Auto mapping started");
 
-        const PCL_DEBUG :bool = true;
+        const PCL_DEBUG :bool = false;
         let mut pcl_cnt = 0;
+
+        const HMAP_DEBUG : bool = true;
+        let mut hmap_cnt = 0;
 
 
         //Create a new network listener
@@ -491,7 +494,12 @@ impl SystemController{
                             let local_hmap = Heightmap::create_from_pcl_list_with_res(pcl_list, HMAP_RES)?;
                             info!("Local heightmap created");;
 
-                            //local_hmap.save_to_file("/home/trl/Desktop/local");
+                            if HMAP_DEBUG{
+                                let fp = format!("../../out/hmap_{}", hmap_cnt);
+                                    local_hmap.save_to_file(&fp);
+                                    hmap_cnt += 1;
+                            }
+
                             
                             //Slot the heightmap into the global heightmap
                             let hmap_updated = self.global_hmap.update_section(local_hmap);
