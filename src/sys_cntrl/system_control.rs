@@ -480,7 +480,7 @@ impl SystemController{
 
                             if PCL_DEBUG{
                                 for pcl in &pcl_list{
-                                    let fp = format!("out/pcl_{}", pcl_cnt);
+                                    let fp = format!("../../out/pcl_{}", pcl_cnt);
                                     pcl.save_to_file(&fp);
                                     pcl_cnt += 1;
                                 }
