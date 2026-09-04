@@ -296,7 +296,7 @@ fn command_handler(mut config_manager : ConfigManager){
                         }
                         
                         
-                        let  hmap = Heightmap::create_from_pcl_list_with_res(pcls, 0.001)?;                                             
+                        let  hmap = Heightmap::create_from_pcl_list_with_res(pcls, 0.001).unwrap();                                             
 
 
                         hmap.save_to_file("../../out/local_map");
