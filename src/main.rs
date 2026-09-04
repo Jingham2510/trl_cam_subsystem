@@ -4,6 +4,7 @@ use std::io::stdin;
 use std::time::SystemTime;
 use chrono::DateTime;
 use chrono::offset::Local;
+use rustgeomapping::data_types::heightmap::Heightmap;
 use std::env;
 
 mod config;
@@ -238,6 +239,8 @@ fn command_handler(mut config_manager : ConfigManager){
 
                         println!("Firing all");
 
+                        println!("{:?}", sys_cntrller.fire_all_cams_image("../../out/fired"));
+
                         
                         let pcls = sys_cntrller.fire_and_transform().unwrap();
 
@@ -247,7 +250,7 @@ fn command_handler(mut config_manager : ConfigManager){
                         
 
                         for pcl in pcls{
-                            pcl.save_to_file(&format!("out/pcl_{i}"));
+                            pcl.save_to_file(&format!("../../out/pcl_{i}"));
 			                i += 1;
                         }
                         
@@ -262,6 +265,55 @@ fn command_handler(mut config_manager : ConfigManager){
                         println!(">Exiting system control");
                     }
                 }
+            }
+
+            ///Take a pointcloud snapshot and turn it into a local heightmap
+            "get debug" =>{
+
+                match SystemController::start_system_control(&mut config_manager){
+
+                    Ok(mut sys_cntrller) =>{
+
+                        println!("Warming up");
+
+                        //Sleep for two to let the frames start streaming
+                        sleep(Duration::from_secs(2));
+
+                        println!("Firing all");
+
+
+
+
+                        
+                        sys_cntrller.set_pos([738.46, 2538.81, 392.48]);
+                        sys_cntrller.set_ori([0.00125, -0.11314, 0.99356, 0.00612]);
+
+                        let pcls = sys_cntrller.fire_and_transform().unwrap();
+
+                        let mut i = 0;
+                        
+
+                        for pcl in pcls.iter(){
+                            pcl.save_to_file(&format!("../../out/pcl_{i}"));
+			                i += 1;
+                        }
+                        
+                        
+                        let  hmap = Heightmap::create_from_pcl_list_with_res(pcls, 0.001).unwrap();                                             
+
+
+                        hmap.save_to_file("../../out/local_map");
+                        
+
+                        println!("Map captured");
+
+                    }
+                    Err(e) =>{
+                        println!("{e}");
+                        println!(">Exiting system control");
+                    }
+                }
+
             }
 
             //Reset the cams

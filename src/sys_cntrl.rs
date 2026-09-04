@@ -1,2 +1,2 @@
 pub mod system_control;
-mod cam_thread;
+//mod cam_thread;
