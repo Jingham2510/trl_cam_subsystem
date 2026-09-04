@@ -3343,7 +3343,7 @@ dependencies = [
 [[package]]
 name = "rustgeomapping"
 version = "0.2.33"
-source = "git+https://github.com/Jingham2510/rustgeomapping#c321ccb294406ebda8e7c1697f3ddcab2b392b18"
+source = "git+https://github.com/Jingham2510/rustgeomapping#ebe31580ec2a83c926ae60a012f042c1e590aa63"
 dependencies = [
  "anyhow",
  "chrono",
