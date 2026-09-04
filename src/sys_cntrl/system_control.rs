@@ -24,10 +24,10 @@ use std::{thread};
 
 use std::sync::mpsc::{Receiver, Sender};
 
-use crate::sys_cntrl::cam_thread;
+use crate::sys_cntrl::cam_thread::CamThread;
 
 
-use tracing::{info, debug};
+use tracing::{info, error};
 
 const SERIAL : bool = true;
 
@@ -221,7 +221,7 @@ impl SystemController{
         global_hmap.set_upper_coord_bounds([0.90, 0.92]);
         global_hmap.set_all_cells(f32::NAN);
 
-        info("Global heightmap created");
+        info!("Global heightmap created");
 
 
         Ok(SystemController{
@@ -345,30 +345,33 @@ impl SystemController{
     pub fn auto_map_start(&mut self) -> Result<(), anyhow::Error>{
         println!(">automapping start - WARNING - DO NOT TYPE");
 
-                
+        /*                
         //If non-serial mode create the camera threads
-        let (threads, triggers, outs) : Option<(Vec<CamThread>, Vec<Sender<bool>>, Vec<Reciever<PointCloud>>)> = if !SERIAL{
+        let (threads, triggers, outs) : Option<(Vec<CamThread>, Vec<Sender<bool>>, Vec<Receiver<PointCloud>>)> = if !SERIAL{
 
             let threads : Vec<CamThread> = vec![];
-            let triggers : Vec<Sender<Bool>> = vec![];
-            let outs : Vec<Reciever<PointCloud>> = vec![];
+            let triggers : Vec<Sender<bool>> = vec![];
+            let outs : Vec<Receiver<PointCloud>> = vec![];
 
             for cam in self.cameras{
 
-                let new_trigger : (Sender<bool>, Reciever<bool>) = mpsc::channel();
-                let new_out : (Sender<PointCloud>, Reciever<PointCloud>) = mpsc::channel();
+                let new_trigger : (Sender<bool>, Receiver<bool>) = mpsc::channel();
+                let new_out : (Sender<PointCloud>, Receiver<PointCloud>) = mpsc::channel();
 
                 triggers.push(new_trigger.0);
                 outs.push(new_out.1);
 
-                threads.append(CamThread::prepare(RefCell::new(cam), &cam.id(), trigger.0, new_out.1));
+                
+
+                threads.append(CamThread::prepare(RefCell::new(cam), &cam.id(), new_trigger.0, new_out.1));
             }
 
-            Option::from((threads, triggers, outs))
+            (threads, triggers, outs).into()
         }else{
             //Otherwise just create a bunch of empty vectors that will go unused (probably inefficient)
             Option::None
         };
+        */
 
 
         info!("Auto mapping started");
@@ -394,6 +397,13 @@ impl SystemController{
                 stream.send(b"YES");
                 break;
              }
+        }
+
+        if !SERIAL{
+            //Turn on the threads if required
+            for thread in threads{
+                thread.spin_up();
+            }
         }
 
 
@@ -432,16 +442,25 @@ impl SystemController{
                         }else{
                             //Only fire all cameras if the main system has sent a pos string - stops the and doesnt risk file being read while incomplete                      
                        
-                            if SERIAL{
+                       /* 
+                            let mut pcl_list = if SERIAL{
                                 //Fire all cameras
-                                let mut pcl_list = self.fire_all_cams()?;
+                                self.fire_all_cams()?
                             }else{
                                 //Trigger the cameras and wait for each to respond
+                                for trigger in triggers{
+                                    trigger.send(true);
+                                }
+                                let mut pcl_list : Vec<PointCloud> = vec![];
+                                for out in outs{
+                                    pcl_list.push(out.recv())
+                                }
+                                pcl_list
 
-
-
-                            }
-
+                            };
+*/
+                            //Fire all cameras
+                            let mut pcl_list = self.fire_all_cams()?;
 
 
                             //Crop the point cloud
