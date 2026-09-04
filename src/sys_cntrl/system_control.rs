@@ -384,7 +384,7 @@ impl SystemController{
 
         info!("Auto mapping started");
 
-        const PCL_DEBUG :bool = false;
+        const PCL_DEBUG :bool = true;
         let mut pcl_cnt = 0;
 
 
