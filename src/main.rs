@@ -238,6 +238,9 @@ fn command_handler(mut config_manager : ConfigManager){
 
                         println!("Firing all");
 
+                        sys_cntrller.set_pos([-29.09, 2575.16, -31.09]);
+                        sys_cntrller.set_ori([0.00127, -0.11324, 0.99355, 0.00629]);
+
                         
                         let pcls = sys_cntrller.fire_and_transform().unwrap();
 

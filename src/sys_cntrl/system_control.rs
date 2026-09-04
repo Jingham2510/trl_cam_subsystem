@@ -232,6 +232,14 @@ impl SystemController{
         })
     }
 
+    pub fn set_pos(&mut self, pos : [f32;3]){
+        self.curr_pos = pos;
+    }
+
+    pub fn set_ori(&mut self, ori : [f32;4]){
+        self.curr_ori = ori;
+    }
+
 
     ///Fire all of the depth cameras the system controls and saves the pointclouds
     pub fn fire_all_cams(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
