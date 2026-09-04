@@ -399,12 +399,13 @@ impl SystemController{
              }
         }
 
+        /*
         if !SERIAL{
             //Turn on the threads if required
             for thread in threads{
                 thread.spin_up();
             }
-        }
+        }*/
 
 
 
