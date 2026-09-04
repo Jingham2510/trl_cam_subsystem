@@ -24,7 +24,7 @@ use std::{thread};
 
 use std::sync::mpsc::{Receiver, Sender};
 
-use crate::sys_cntrl::cam_thread::CamThread;
+//use crate::sys_cntrl::cam_thread::CamThread;
 
 
 use tracing::{info, error};
