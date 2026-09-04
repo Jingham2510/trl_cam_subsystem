@@ -173,7 +173,7 @@ impl SystemController{
         let log_file = OpenOptions::new()
             .create(true)
             .write(true)
-            .open("out/log.log")
+            .open("../../out/log.log")
             .unwrap();
 
         //Start the logging tool
