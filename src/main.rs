@@ -239,7 +239,7 @@ fn command_handler(mut config_manager : ConfigManager){
 
                         println!("Firing all");
 
-                        println!("{:?}", sys_cntrller.fire_all_cams_image("out/fired"));
+                        println!("{:?}", sys_cntrller.fire_all_cams_image("../../out/fired"));
 
                         
                         let pcls = sys_cntrller.fire_and_transform().unwrap();
@@ -280,6 +280,8 @@ fn command_handler(mut config_manager : ConfigManager){
                         sleep(Duration::from_secs(2));
 
                         println!("Firing all");
+
+
 
 
                         
