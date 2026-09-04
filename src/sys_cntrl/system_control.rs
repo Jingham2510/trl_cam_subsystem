@@ -217,8 +217,8 @@ impl SystemController{
         info!("{} cams detected", realsense_cnt);
 
         let mut global_hmap = Heightmap::new(GLOBAL_HMAP_WIDTH, GLOBAL_HMAP_HEIGHT);
-        global_hmap.set_lower_coord_bounds([-20.0, -20.0]);
-        global_hmap.set_upper_coord_bounds([20.0, 20.0]);
+        global_hmap.set_lower_coord_bounds([0.0, 0.0]);
+        global_hmap.set_upper_coord_bounds([1.0, 1.0]);
         global_hmap.set_all_cells(f32::NAN);
 
         info!("Global heightmap created");
@@ -292,7 +292,6 @@ impl SystemController{
     fn workspace_transform(&self, pcl_list : &mut Vec<PointCloud>){
 
         for (i ,pcl) in pcl_list.iter_mut().enumerate(){  
-
     
 
             // Positions in metres
