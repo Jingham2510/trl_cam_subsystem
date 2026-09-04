@@ -4,6 +4,7 @@ use std::io::stdin;
 use std::time::SystemTime;
 use chrono::DateTime;
 use chrono::offset::Local;
+use rustgeomapping::data_types::heightmap::Heightmap;
 use std::env;
 
 mod config;
@@ -238,8 +239,6 @@ fn command_handler(mut config_manager : ConfigManager){
 
                         println!("Firing all");
 
-                        sys_cntrller.set_pos([-29.09, 2575.16, 196.75]);
-                        sys_cntrller.set_ori([0.00127, -0.11324, 0.99355, 0.00629]);
 
                         
                         let pcls = sys_cntrller.fire_and_transform().unwrap();
@@ -265,6 +264,50 @@ fn command_handler(mut config_manager : ConfigManager){
                         println!(">Exiting system control");
                     }
                 }
+            }
+
+            ///Take a pointcloud snapshot and turn it into a local heightmap
+            "get debug" =>{
+
+                match SystemController::start_system_control(&mut config_manager){
+
+                    Ok(mut sys_cntrller) =>{
+
+                        println!("Warming up");
+
+                        //Sleep for two to let the frames start streaming
+                        sleep(Duration::from_secs(2));
+
+                        println!("Firing all");
+
+
+                        
+                        let pcls = sys_cntrller.fire_and_transform().unwrap();
+
+                        let mut i = 0;
+                        
+
+                        for pcl in pcls{
+                            pcl.save_to_file(&format!("../../out/pcl_{i}"));
+			                i += 1;
+                        }
+                        
+                        
+                        let  hmap = Heightmap::create_from_pcl_list_with_res(pcls, 0.001)?;                                             
+
+
+                        hmap.save_to_file("../../out/local_map");
+                        
+
+                        println!("Map captured");
+
+                    }
+                    Err(e) =>{
+                        println!("{e}");
+                        println!(">Exiting system control");
+                    }
+                }
+
             }
 
             //Reset the cams
