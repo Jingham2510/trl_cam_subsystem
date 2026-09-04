@@ -239,6 +239,7 @@ fn command_handler(mut config_manager : ConfigManager){
 
                         println!("Firing all");
 
+                        println!("{:?}", sys_cntrller.fire_all_cams_image("out/fired"));
 
                         
                         let pcls = sys_cntrller.fire_and_transform().unwrap();
@@ -282,7 +283,7 @@ fn command_handler(mut config_manager : ConfigManager){
 
 
                         
-                        sys_cntrller.set_pos([19.75, 1600.10, 392.33]);
+                        sys_cntrller.set_pos([738.46, 2538.81, 392.48]);
                         sys_cntrller.set_ori([0.00125, -0.11314, 0.99356, 0.00612]);
 
                         let pcls = sys_cntrller.fire_and_transform().unwrap();
