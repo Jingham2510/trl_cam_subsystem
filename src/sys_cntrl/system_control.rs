@@ -24,7 +24,7 @@ use std::{thread};
 
 use std::sync::mpsc::{Receiver, Sender};
 
-//use crate::sys_cntrl::cam_thread::CamThread;
+use crate::sys_cntrl::cam_thread::CamThread;
 
 
 use tracing::{info, error};
@@ -352,7 +352,7 @@ impl SystemController{
     pub fn auto_map_start(&mut self) -> Result<(), anyhow::Error>{
         println!(">automapping start - WARNING - DO NOT TYPE");
 
-        /*                
+                       
         //If non-serial mode create the camera threads
         let (threads, triggers, outs) : Option<(Vec<CamThread>, Vec<Sender<bool>>, Vec<Receiver<PointCloud>>)> = if !SERIAL{
 
@@ -378,7 +378,7 @@ impl SystemController{
             //Otherwise just create a bunch of empty vectors that will go unused (probably inefficient)
             Option::None
         };
-        */
+        
 
 
         info!("Auto mapping started");
@@ -409,13 +409,13 @@ impl SystemController{
              }
         }
 
-        /*
+        
         if !SERIAL{
             //Turn on the threads if required
             for thread in threads{
                 thread.spin_up();
             }
-        }*/
+        }
 
 
 
@@ -453,7 +453,7 @@ impl SystemController{
                         }else{
                             //Only fire all cameras if the main system has sent a pos string - stops the and doesnt risk file being read while incomplete                      
                        
-                       /* 
+                       
                             let mut pcl_list = if SERIAL{
                                 //Fire all cameras
                                 self.fire_all_cams()?
@@ -469,7 +469,7 @@ impl SystemController{
                                 pcl_list
 
                             };
-*/
+
                             //Fire all cameras
                             let mut pcl_list = self.fire_all_cams()?;
 
@@ -507,7 +507,6 @@ impl SystemController{
                                 Ok(_) =>{
                                     info!("Global heightmap updated");
                                 }
-
                                 Err(e) =>{
                                     error!("Failed to update heightmap - {}", e)
                                 }
