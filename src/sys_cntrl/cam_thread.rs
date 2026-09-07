@@ -59,7 +59,7 @@ impl CamThread{
                 let pcl = self.cam.borrow_mut().get_pointcloud();
 
                 //Send the measurement
-                pcl_out.sened(pcl);
+                pcl_out.send(pcl);
 
             }else{
                 //If the trigger is false, switch off the thread

@@ -354,7 +354,7 @@ impl SystemController{
 
                        
         //If non-serial mode create the camera threads
-        let (threads, triggers, outs) : Option<(Vec<CamThread>, Vec<Sender<bool>>, Vec<Receiver<PointCloud>>)> = if !SERIAL{
+        let Option::from((threads, triggers, outs)) : Option<(Vec<CamThread>, Vec<Sender<bool>>, Vec<Receiver<PointCloud>>)> = if !SERIAL{
 
             let threads : Vec<CamThread> = vec![];
             let triggers : Vec<Sender<bool>> = vec![];
@@ -367,13 +367,12 @@ impl SystemController{
 
                 triggers.push(new_trigger.0);
                 outs.push(new_out.1);
-
                 
 
-                threads.append(CamThread::prepare(RefCell::new(cam), &cam.id(), new_trigger.0, new_out.1));
+                threads.push(CamThread::prepare(RefCell::new(cam), cam.id(), new_trigger.0, new_out.0));
             }
 
-            (threads, triggers, outs).into()
+            Option::from((threads, triggers, outs))
         }else{
             //Otherwise just create a bunch of empty vectors that will go unused (probably inefficient)
             Option::None
@@ -453,9 +452,9 @@ impl SystemController{
                         }else{
                             //Only fire all cameras if the main system has sent a pos string - stops the and doesnt risk file being read while incomplete                      
                        
-                       
+                            //Fire all cameras
                             let mut pcl_list = if SERIAL{
-                                //Fire all cameras
+                                
                                 self.fire_all_cams()?
                             }else{
                                 //Trigger the cameras and wait for each to respond
@@ -469,9 +468,6 @@ impl SystemController{
                                 pcl_list
 
                             };
-
-                            //Fire all cameras
-                            let mut pcl_list = self.fire_all_cams()?;
 
 
                             //Crop the point cloud
