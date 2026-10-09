@@ -2,7 +2,7 @@
 Camera control thread 
 Allows for cam firing parallelism
 */
-use rustgeomapping::depth_cam;
+use rustgeomapping::depth_cam::{CamType, DepthCam};
 use rustgeomapping::data_types::pointcloud::PointCloud;
 
 use std::cell::RefCell;
@@ -19,7 +19,7 @@ pub struct CamThread{
     ///The id to sort out which camera has sent the pointcloud
     id : u32,
     ///Trigger the camera
-    trigger : mpsc::Reciever<bool>,
+    trigger : mpsc::Receiver<bool>,
     ///Get the pointcloud out of the thread
     pcl_out : mpsc::Sender<PointCloud>
 }
@@ -28,7 +28,7 @@ pub struct CamThread{
 impl CamThread{
 
     //Prepares all the variables required for the camera thread
-    pub fn prepare(cam : RefCell<CamType>, id : u32, trigger : mpsc::Reciever<bool>, pcl_out : mpsc::Sender<PointCloud>) -> Self{
+    pub fn prepare(cam : RefCell<CamType>, id : u32, trigger : mpsc::Receiver<bool>, pcl_out : mpsc::Sender<PointCloud>) -> Self{
 
         Self{
             cam,
@@ -54,12 +54,12 @@ impl CamThread{
 
         while true{
 
-            if self.trigger.recv() == true{
+            if self.trigger.recv().unwrap() == true{
                 //Trigger the measurement
                 let pcl = self.cam.borrow_mut().get_pointcloud();
 
                 //Send the measurement
-                pcl_out.send(pcl);
+                self.pcl_out.send(pcl);
 
             }else{
                 //If the trigger is false, switch off the thread

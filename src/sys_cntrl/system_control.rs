@@ -354,7 +354,7 @@ impl SystemController{
 
                        
         //If non-serial mode create the camera threads
-        let Option::from((threads, triggers, outs)) : Option<(Vec<CamThread>, Vec<Sender<bool>>, Vec<Receiver<PointCloud>>)> = if !SERIAL{
+        let thread_data : Option<(Vec<CamThread>, Vec<Sender<bool>>, Vec<Receiver<PointCloud>>)> = if !SERIAL{
 
             let threads : Vec<CamThread> = vec![];
             let triggers : Vec<Sender<bool>> = vec![];
@@ -369,7 +369,7 @@ impl SystemController{
                 outs.push(new_out.1);
                 
 
-                threads.push(CamThread::prepare(RefCell::new(cam), cam.id(), new_trigger.0, new_out.0));
+                threads.push(CamThread::prepare(RefCell::new(cam), cam.id(), new_trigger.1, new_out.0));
             }
 
             Option::from((threads, triggers, outs))
@@ -411,12 +411,10 @@ impl SystemController{
         
         if !SERIAL{
             //Turn on the threads if required
-            for thread in threads{
+            for thread in thread_data.unwrap().0{
                 thread.spin_up();
             }
         }
-
-
 
         
         //Do until main system instructs to stop
@@ -458,12 +456,12 @@ impl SystemController{
                                 self.fire_all_cams()?
                             }else{
                                 //Trigger the cameras and wait for each to respond
-                                for trigger in triggers{
+                                for trigger in thread_data.unwrap().1{
                                     trigger.send(true);
                                 }
                                 let mut pcl_list : Vec<PointCloud> = vec![];
-                                for out in outs{
-                                    pcl_list.push(out.recv())
+                                for out in thread_data.unwrap().2{
+                                    pcl_list.push(out.recv()?)
                                 }
                                 pcl_list
 
