@@ -25,6 +25,7 @@ pub struct CamThread{
 }
 
 
+/*
 impl CamThread{
 
     //Prepares all the variables required for the camera thread
@@ -71,3 +72,5 @@ impl CamThread{
 
 
 }
+
+*/

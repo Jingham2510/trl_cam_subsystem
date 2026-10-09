@@ -24,7 +24,12 @@ use std::{thread};
 
 use std::sync::mpsc::{Receiver, Sender};
 
+
+
+use std::sync::{Arc, Mutex};
+
 use crate::sys_cntrl::cam_thread::CamThread;
+
 
 
 use tracing::{info, error};
@@ -34,7 +39,7 @@ const SERIAL : bool = true;
 
 pub struct SystemController{
     ///The camera objects that are plugged in 
-    cameras : Vec<CamType>,
+    cameras : Vec<Arc<Mutex<CamType>>>,
     ///The current heightmap of the system
     global_hmap : Heightmap,
 
@@ -203,13 +208,13 @@ impl SystemController{
 
         //If valid cameras - 
         let cam_list = config.cams();
-        let mut connected_cams : Vec<CamType> = vec![];
+        let mut connected_cams : Vec<Arc<Mutex<CamType>>> = vec![];
 
         let mut realsense_cnt = 0;
 
         for cam in cam_list{
             if cam == "Realsense"{
-                connected_cams.push(CamType::RealsenseCam(DepthCam::connect_realsense(realsense_cnt)?));
+                connected_cams.push(Arc::new(Mutex::new(CamType::RealsenseCam(DepthCam::connect_realsense(realsense_cnt)?))));
                 realsense_cnt += 1;
             }
         }
@@ -250,6 +255,8 @@ impl SystemController{
 
         for (i, cam) in self.cameras.iter_mut().enumerate(){  
             
+            let mut cam = cam.lock().unwrap();
+
             pcl_vec.push(cam.take_pcl()?);
         }
      
@@ -353,6 +360,7 @@ impl SystemController{
         println!(">automapping start - WARNING - DO NOT TYPE");
 
                        
+        /*
         //If non-serial mode create the camera threads
         let thread_data : Option<(Vec<CamThread>, Vec<Sender<bool>>, Vec<Receiver<PointCloud>>)> = if !SERIAL{
 
@@ -377,6 +385,7 @@ impl SystemController{
             //Otherwise just create a bunch of empty vectors that will go unused (probably inefficient)
             Option::None
         };
+        */
         
 
 
@@ -408,13 +417,14 @@ impl SystemController{
              }
         }
 
-        
+        /*
         if !SERIAL{
             //Turn on the threads if required
             for thread in thread_data.unwrap().0{
                 thread.spin_up();
             }
         }
+            */
 
         
         //Do until main system instructs to stop
@@ -455,6 +465,32 @@ impl SystemController{
                                 
                                 self.fire_all_cams()?
                             }else{
+
+                                let mut pcl_out : Vec<PointCloud> = vec![];
+                                async{
+                                        let tasks: Vec<_> = self
+                                                            .cameras
+                                                            .iter()
+                                                            .map(|cam| {
+                                                                let cam = Arc::clone(cam);
+                                                                tokio::task::spawn_blocking(move || {
+                                                                    let mut cam = cam.lock().unwrap();
+                                                                    cam.take_pcl()
+                                                                })
+                                                            })
+                                                            .collect();
+
+                                            
+                                
+                                        for task in tasks{
+                                            pcl_out.push(task.await.unwrap().expect("Failed to get pointcloud"));
+                                        }
+                                    };                            
+
+                                pcl_out
+
+
+                                /*
                                 //Trigger the cameras and wait for each to respond
                                 for trigger in thread_data.unwrap().1{
                                     trigger.send(true);
@@ -464,6 +500,8 @@ impl SystemController{
                                     pcl_list.push(out.recv()?)
                                 }
                                 pcl_list
+
+                                */
 
                             };
 
@@ -647,6 +685,7 @@ impl SystemController{
         let mut intrinsics : Vec<IntrinsicInfo> = vec![];
 
         for cam in self.cameras.iter(){
+            let cam = cam.lock().unwrap();
             intrinsics.push(cam.get_intrinsics()?)
         }
 
@@ -660,9 +699,14 @@ impl SystemController{
         
         //Create each image and label it according to its number in the id
         for cam in self.cameras.iter_mut(){
+
+            let mut cam = cam.lock().unwrap();
+
             println!("Cam {} firing", cam.id());   
             let img_fp = format!("{}_{}", base_filepath, cam.id());                     
             filepaths.push(cam.get_colour_image(&img_fp)?);
+
+            
 
 
         }
