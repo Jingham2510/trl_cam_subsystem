@@ -17,7 +17,7 @@ use std::process::exit;
 use std::net::UdpSocket;
 use std::sync::mpsc;
 use std::{any, fs};
-use std::fs::OpenOptions;
+
 use std::time::{SystemTime, Duration};
 use std::ops::{Index, Mul};
 use std::{thread};
@@ -28,13 +28,11 @@ use std::sync::mpsc::{Receiver, Sender};
 
 use std::sync::{Arc, Mutex};
 
-use crate::sys_cntrl::cam_thread::CamThread;
 
-
-
+use std::fs::OpenOptions;
 use tracing::{info, error};
 
-const SERIAL : bool = true;
+const SERIAL : bool = false;
 
 
 pub struct SystemController{
@@ -174,21 +172,7 @@ impl SystemController{
     ///Starts the system, taking control away from the user
     pub fn start_system_control(config : &mut ConfigManager) -> Result<Self, anyhow::Error>{
 
-        //Create a blank logging file in the output (or overwrite the previous log if it exists)
-        let log_file = OpenOptions::new()
-            .create(true)
-            .write(true)
-            .open("../../out/log.log")
-            .unwrap();
-
-        //Start the logging tool
-        tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::DEBUG)
-        .with_target(false)
-        .with_writer(log_file)
-        .init();
-
-        info!("Logging started");
+      
 
         println!(">Starting system control - no longer accepting typed user input");
         println!(">GLOBAL WIDTH:{} GLOBAL HEIGHT:{}", GLOBAL_HMAP_WIDTH, GLOBAL_HMAP_WIDTH);
@@ -222,8 +206,8 @@ impl SystemController{
         info!("{} cams detected", realsense_cnt);
 
         let mut global_hmap = Heightmap::new(GLOBAL_HMAP_WIDTH, GLOBAL_HMAP_HEIGHT);
-        global_hmap.set_lower_coord_bounds([-0.5, -0.5]);
-        global_hmap.set_upper_coord_bounds([1.5, 1.5]);
+        global_hmap.set_lower_coord_bounds([0.0, 0.0]);
+        global_hmap.set_upper_coord_bounds([1.0, 1.0]);
         global_hmap.set_all_cells(f32::NAN);
 
         info!("Global heightmap created");
@@ -263,6 +247,46 @@ impl SystemController{
         info!("Cams fired");
 
         Ok(pcl_vec)
+    }
+
+    ///Fire all of the cameras asynchronously in seperate tokio tasks
+    pub fn async_fire_all(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
+
+        //println!("Asynchronously firing all");
+
+        let results: Vec<Result<PointCloud, anyhow::Error>> = std::thread::scope(|s| {
+            let handles: Vec<_> = self
+                .cameras
+                .iter()
+                .map(|cam| {
+                    s.spawn(move || -> Result<PointCloud, anyhow::Error> {
+                        let mut cam = cam
+                            .lock()
+                            .map_err(|e| anyhow::anyhow!("Failed to get cam lock - {e}"))?;
+                        //println!("Acquired cam lock");
+                        cam.take_pcl()
+                    })
+                })
+                .collect();
+
+            handles
+                .into_iter()
+                .map(|h| h.join().unwrap_or_else(|_| Err(anyhow::anyhow!("Thread panicked"))))
+                .collect()
+        });
+
+        let mut pcls = Vec::new();
+        for res in results {
+            match res {
+                Ok(pcl) => {
+                    //println!("pcl captured");
+                    pcls.push(pcl);
+                }
+                Err(e) => println!("Capture error! - {e}"),
+            }
+        }
+        Ok(pcls)
+
     }
 
     ///Fire all the cameras and perform the workplace transform on each of them
@@ -359,33 +383,7 @@ impl SystemController{
     pub fn auto_map_start(&mut self) -> Result<(), anyhow::Error>{
         println!(">automapping start - WARNING - DO NOT TYPE");
 
-                       
-        /*
-        //If non-serial mode create the camera threads
-        let thread_data : Option<(Vec<CamThread>, Vec<Sender<bool>>, Vec<Receiver<PointCloud>>)> = if !SERIAL{
-
-            let threads : Vec<CamThread> = vec![];
-            let triggers : Vec<Sender<bool>> = vec![];
-            let outs : Vec<Receiver<PointCloud>> = vec![];
-
-            for cam in self.cameras{
-
-                let new_trigger : (Sender<bool>, Receiver<bool>) = mpsc::channel();
-                let new_out : (Sender<PointCloud>, Receiver<PointCloud>) = mpsc::channel();
-
-                triggers.push(new_trigger.0);
-                outs.push(new_out.1);
-                
-
-                threads.push(CamThread::prepare(RefCell::new(cam), cam.id(), new_trigger.1, new_out.0));
-            }
-
-            Option::from((threads, triggers, outs))
-        }else{
-            //Otherwise just create a bunch of empty vectors that will go unused (probably inefficient)
-            Option::None
-        };
-        */
+     
         
 
 
@@ -394,7 +392,7 @@ impl SystemController{
         const PCL_DEBUG :bool = false;
         let mut pcl_cnt = 0;
 
-        const HMAP_DEBUG : bool = true;
+        const HMAP_DEBUG : bool = false;
         let mut hmap_cnt = 0;
 
 
@@ -417,15 +415,7 @@ impl SystemController{
              }
         }
 
-        /*
-        if !SERIAL{
-            //Turn on the threads if required
-            for thread in thread_data.unwrap().0{
-                thread.spin_up();
-            }
-        }
-            */
-
+       
         
         //Do until main system instructs to stop
         loop{           
@@ -466,43 +456,7 @@ impl SystemController{
                                 self.fire_all_cams()?
                             }else{
 
-                                let mut pcl_out : Vec<PointCloud> = vec![];
-                                async{
-                                        let tasks: Vec<_> = self
-                                                            .cameras
-                                                            .iter()
-                                                            .map(|cam| {
-                                                                let cam = Arc::clone(cam);
-                                                                tokio::task::spawn_blocking(move || {
-                                                                    let mut cam = cam.lock().unwrap();
-                                                                    cam.take_pcl()
-                                                                })
-                                                            })
-                                                            .collect();
-
-                                            
-                                
-                                        for task in tasks{
-                                            pcl_out.push(task.await.unwrap().expect("Failed to get pointcloud"));
-                                        }
-                                    };                            
-
-                                pcl_out
-
-
-                                /*
-                                //Trigger the cameras and wait for each to respond
-                                for trigger in thread_data.unwrap().1{
-                                    trigger.send(true);
-                                }
-                                let mut pcl_list : Vec<PointCloud> = vec![];
-                                for out in thread_data.unwrap().2{
-                                    pcl_list.push(out.recv()?)
-                                }
-                                pcl_list
-
-                                */
-
+                                self.async_fire_all()?
                             };
 
 
@@ -703,7 +657,8 @@ impl SystemController{
             let mut cam = cam.lock().unwrap();
 
             println!("Cam {} firing", cam.id());   
-            let img_fp = format!("{}_{}", base_filepath, cam.id());                     
+            let img_fp = format!("{}_{}", base_filepath, cam.id());
+            println!("{}", img_fp);                     
             filepaths.push(cam.get_colour_image(&img_fp)?);
 
             
@@ -738,7 +693,11 @@ impl SystemController{
 
     ///Reset all connected hardware
     pub fn reset_hardware() -> Result<(), anyhow::Error>{
-        RealsenseCam::reset_all()
+        
+        
+        RealsenseCam::reset_all();
+        info!("Cameras reset");
+        Ok(())
     }
 
 

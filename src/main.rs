@@ -19,10 +19,28 @@ use std::time::Duration;
 use std::thread::sleep;
 
 
+use std::fs::OpenOptions;
+use tracing::{info, error};
 
 
 ///Entry point - presents the homepage
 fn main() {
+
+      //Create a blank logging file in the output (or overwrite the previous log if it exists)
+    let log_file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .open("../../out/log.log")
+        .unwrap();
+
+    //Start the logging tool
+    tracing_subscriber::fmt()
+    .with_max_level(tracing::Level::DEBUG)
+    .with_target(false)
+    .with_writer(log_file)
+    .init();
+
+    info!("Logging started");
 
     unsafe{
     env::set_var("RUST_BACKTRACE", "1");
@@ -196,7 +214,7 @@ fn command_handler(mut config_manager : ConfigManager){
                     Ok(mut sys_cntrller) =>{
                         println!(">System started");
                         
-                        println!("{:?}", sys_cntrller.fire_all_cams_image("out/fired"));
+                        println!("{:?}", sys_cntrller.fire_all_cams_image("../../out/fired"));
 
 
 
@@ -239,25 +257,37 @@ fn command_handler(mut config_manager : ConfigManager){
 
                         println!("Firing all");
 
-                        println!("{:?}", sys_cntrller.fire_all_cams_image("../../out/fired"));
 
-                        
-                        let pcls = sys_cntrller.fire_and_transform().unwrap();
+                        println!("async");
+                        let mut pcls = sys_cntrller.async_fire_all();
+                        println!("done");
 
-                        
-                
-                        let mut i = 0;
-                        
+                        //Check that the pcls were captured
+                        match pcls{
+                            Ok(pcls)=>{
 
-                        for pcl in pcls{
-                            pcl.save_to_file(&format!("../../out/pcl_{i}"));
-			                i += 1;
+                                let mut i = 0;   
+                                
+
+                                for pcl in pcls{
+                                    pcl.save_to_file(&format!("../../out/pcl_{i}"));
+                                    i += 1;
+                                }      
+                                
+
+                                println!("{} pointclouds saved", i);
+
+                            }
+
+
+                            Err(e) =>{
+                                println!("Failed! - {}", e);
+                            }
                         }
-                        
+                                  
 
                         
 
-                        println!("Points captured");
 
                     }
                     Err(e) =>{
@@ -285,8 +315,8 @@ fn command_handler(mut config_manager : ConfigManager){
 
 
                         
-                        sys_cntrller.set_pos([738.46, 2538.81, 392.48]);
-                        sys_cntrller.set_ori([0.00125, -0.11314, 0.99356, 0.00612]);
+                        sys_cntrller.set_pos([340.95, 1919.72, 88.06]);
+                        sys_cntrller.set_ori([0.01272, -0.74894, 0.66245, 0.00943]);
 
                         let pcls = sys_cntrller.fire_and_transform().unwrap();
 
@@ -314,6 +344,38 @@ fn command_handler(mut config_manager : ConfigManager){
                     }
                 }
 
+            }
+
+            "fire raw" =>{
+
+                match SystemController::start_system_control(&mut config_manager){
+
+                    Ok(mut sys_cntrller) =>{
+
+                        println!("Warming up");
+
+                        //Sleep for two to let the frames start streaming
+                        sleep(Duration::from_secs(2));
+
+                        println!("Firing all");
+
+                        let pcls = sys_cntrller.fire_all_cams().unwrap();
+
+
+                        let mut i = 0;
+                        
+
+                        for pcl in pcls.iter(){
+                            pcl.save_to_file(&format!("../../out/pcl_{i}"));
+			                i += 1;
+                        }
+                    }
+                    Err(e) =>{
+                        println!("{e}");
+                        println!(">Exiting system control");
+                    }
+                }
+                        
             }
 
             //Reset the cams
