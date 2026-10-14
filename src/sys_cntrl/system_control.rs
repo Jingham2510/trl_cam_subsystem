@@ -363,7 +363,7 @@ impl SystemController{
             //The camera space is calculated by doing a rigid transformation from the tcp position/orientation to the position of the camera
         
 
-            let T_world_curr =   FINE_TUNES[i] * T_WORLD_CALIB[i] * T_calib_curr;
+            let T_world_curr =   /*FINE_TUNES[i]*/ T_WORLD_CALIB[i] * T_calib_curr;
 
             //println!("Final transform: {}", T_world_curr);
 
