@@ -633,7 +633,7 @@ impl SystemController{
     }
 
     ///Get each connected cameras intrinsic matrix
-    fn get_all_intrinsics(&self) -> Result<Vec<IntrinsicInfo>, anyhow::Error>{
+    pub fn get_all_intrinsics(&self) -> Result<Vec<IntrinsicInfo>, anyhow::Error>{
 
         //Request the intrinsic matrix info from the camera
         let mut intrinsics : Vec<IntrinsicInfo> = vec![];

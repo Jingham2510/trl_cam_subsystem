@@ -181,6 +181,23 @@ fn command_handler(mut config_manager : ConfigManager){
 
             }
 
+            //Get the intrinsics of the cameras
+            "get intrinsics" =>{
+                match SystemController::start_system_control(&mut config_manager){
+
+                    Ok(mut sys_cntrller) =>{
+                       let intrinsics = sys_cntrller.get_all_intrinsics().unwrap();
+
+                       println!("{:?}", intrinsics);
+                    }
+                    Err(e) =>{
+                        println!("{e}");
+                        println!(">Exiting system control")
+                }
+
+                }
+            }
+
             //Start the system controller 
             "start system" =>{
                 
