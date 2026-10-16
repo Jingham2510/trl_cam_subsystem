@@ -42,7 +42,6 @@ impl ConfigManager{
         }
 
 
-
         ConfigManager{
             date: SystemTime::now().into(),
             cams,
