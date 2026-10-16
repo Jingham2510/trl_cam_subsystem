@@ -29,6 +29,15 @@ impl ConfigManager{
         for device in rusb::devices().unwrap().iter() {
             let device_desc = device.device_descriptor().unwrap();
 
+            //If a STEREOLABS device - check that it is a camera not a HID device
+            if &device_desc.vendor_id() == 0x2b03{
+                //0xf682 is a ZED-M camera
+                if &device_desc.product_id() != 0xf682{
+                    continue
+                }
+            }
+
+
             if VENDOR_IDS.contains(&device_desc.vendor_id()){
                 valid_devs = true;
                 cams.push(format!("{}",
