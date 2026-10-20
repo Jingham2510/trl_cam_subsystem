@@ -396,6 +396,26 @@ fn command_handler(mut config_manager : ConfigManager){
                         
             }
 
+            "pos loop" =>{
+                match SystemController::start_system_control(&mut config_manager){
+
+                    Ok(mut sys_cntrller) =>{
+
+                        loop{
+                            let pos_est = sys_cntrller.get_pos();
+
+                            println!("{:?}", pos_est);
+                        }
+
+                    }
+                    Err(e) =>{
+                        println!("Err - {e}");
+                        println!(">Exiting system control");
+                    }
+                }
+                
+            }
+
             //Reset the cams
             "reset cams" =>{
                 SystemController::reset_hardware();

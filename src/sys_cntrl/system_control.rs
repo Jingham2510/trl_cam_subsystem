@@ -195,15 +195,21 @@ impl SystemController{
         let mut connected_cams : Vec<Arc<Mutex<CamType>>> = vec![];
 
         let mut realsense_cnt = 0;
+        let mut zed_cnt = 0;
 
         for cam in cam_list{
             if cam == "Realsense"{
                 connected_cams.push(Arc::new(Mutex::new(CamType::RealsenseCam(DepthCam::connect_realsense(realsense_cnt)?))));
                 realsense_cnt += 1;
             }
+            if cam == "STEREOLABS"{
+                connected_cams.push(Arc::new(Mutex::new(CamType::ZedCamera(DepthCam::connect_zed(zed_cnt)?))));
+                zed_cnt += 1;
+            }
         }
 
-        info!("{} cams detected", realsense_cnt);
+        info!("{} realsense cams detected", realsense_cnt);
+        info!("{} zed cams detected", zed_cnt);
 
         let mut global_hmap = Heightmap::new(GLOBAL_HMAP_WIDTH, GLOBAL_HMAP_HEIGHT);
         global_hmap.set_lower_coord_bounds([0.0, 0.0]);
@@ -298,8 +304,7 @@ impl SystemController{
 
         self.standard_crop(&mut pcl_vec);        
 
-        self.workspace_transform(&mut pcl_vec);      
-
+        self.workspace_transform(&mut pcl_vec);     
 
      
         Ok(pcl_vec)
@@ -652,12 +657,12 @@ impl SystemController{
         let mut filepaths : Vec<String> = vec![];
         
         //Create each image and label it according to its number in the id
-        for cam in self.cameras.iter_mut(){
+        for (i, cam) in self.cameras.iter_mut().enumerate(){
 
             let mut cam = cam.lock().unwrap();
 
-            println!("Cam {} firing", cam.id());   
-            let img_fp = format!("{}_{}", base_filepath, cam.id());
+            println!("Cam {} firing", i);   
+            let img_fp = format!("{}_{}", base_filepath, i);
             println!("{}", img_fp);                     
             filepaths.push(cam.get_colour_image(&img_fp)?);
 
@@ -689,6 +694,30 @@ impl SystemController{
 
         Ok(())
     }  
+
+
+
+    ///Get the estimated position from every single camera
+    pub fn get_pos(&mut self) -> Result<Vec<[f32;3]>, anyhow::Error>{
+
+        let mut pos_vec : Vec<[f32;3]> = vec![];
+
+        for cam in self.cameras.iter_mut(){
+
+            let mut cam = cam.lock().unwrap();
+
+            //Check that the cameras imu is on
+            if cam.imu_enabled{
+                pos_vec.push(cam.get_pos()?);
+            }
+
+            
+
+        }
+
+        
+        return Ok(pos_vec)
+    }
 
 
     ///Reset all connected hardware
