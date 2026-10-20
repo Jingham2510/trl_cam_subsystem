@@ -26,6 +26,7 @@ use std::sync::mpsc::{Receiver, Sender};
 
 
 
+
 use std::sync::{Arc, Mutex};
 
 
@@ -50,6 +51,9 @@ pub struct SystemController{
 
 //Filepath for height map saving
 const HMAP_FP : &str = "/home/trl/Desktop/global";
+
+//Filepath for cam pos estimation log
+const CAM_LOG_FP : &str = "../../out/cam_pos_log.txt";
 
 
 //Heightmap size controllers - hmap size based on a resolution of 0.0010m over a space of 1m?
@@ -189,6 +193,15 @@ impl SystemController{
         }else{
             println!(">{} cameras detected", no_of_cams);
         }
+
+        //Create the cam_move log
+        //Create the data file with the csv header
+        let mut data_file = OpenOptions::new()
+            .truncate(true)
+            .create(true)
+            .open(CAM_LOG_FP)
+            .unwrap();
+
 
         //If valid cameras - 
         let cam_list = config.cams();
@@ -541,6 +554,8 @@ impl SystemController{
                             }
 
                             info!("Packets sent");
+
+                            self.log_cam_pos_est();
                             
 
                         };  
@@ -709,14 +724,26 @@ impl SystemController{
             //Check that the cameras imu is on
             if cam.imu_enabled{
                 pos_vec.push(cam.get_pos()?);
-            }
-
-            
-
+            } 
         }
-
-        
         return Ok(pos_vec)
+    }
+
+    ///Log the camera reported position
+    pub fn log_cam_pos_est(&mut self) -> Result<(), anyhow::Error>{
+
+        let pos_ests = self.get_pos()?;
+
+        //Create the data file with the csv header
+        let mut data_file = OpenOptions::new()
+            .append(true)
+            .open(&t_data.data_filename)
+            .unwrap();
+
+        data_file.write_all(format!("{:?}\n", pos_ests).as_bytes());
+
+
+        Ok(())
     }
 
 
