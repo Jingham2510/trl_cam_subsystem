@@ -401,10 +401,6 @@ impl SystemController{
     pub fn auto_map_start(&mut self) -> Result<(), anyhow::Error>{
         println!(">automapping start - WARNING - DO NOT TYPE");
 
-     
-        
-
-
         info!("Auto mapping started");
 
         const PCL_DEBUG :bool = false;
@@ -515,7 +511,6 @@ impl SystemController{
                                     error!("Failed to update heightmap - {}", e)
                                 }
                             }
-
                             
 
 
@@ -567,6 +562,44 @@ impl SystemController{
 
             Ok(())
         }
+
+    
+    ///A loop that constantly saves pointclouds - without transforming them
+    pub fn pcl_save_loop(&mut self) -> Result<(), anyhow::Error>{
+
+
+        const POINTCLOUD_LIMIT : usize = 1000;
+
+        println!("Please provide a test name");
+
+        //Get the user filepath
+        let mut inp= String::new();
+        stdin().read_line(&mut inp).expect("Did not enter a correct string");
+
+        let base_fp = format!("../../out/{}", inp);
+
+        let mut total = 0;
+
+        //Maximum 1000 pointclouds
+        for i in 0..POINTCLOUD_LIMIT{
+
+            //Take the pointclodus asynchronously
+            let pcls = self.async_fire_all()?;
+
+            //Save each pointcloud with a unique name
+            for (j, pcl) in pcls.iter().enumerate(){
+                let fp = format!("{}_{}_{}", base_fp, total, i);
+                pcl.save_to_file(&fp);
+            }
+
+            total += 1;
+
+            println!("{} pcls saved", total);
+        }
+
+        Ok(())
+
+    }
 
 
 

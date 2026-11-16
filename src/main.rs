@@ -223,6 +223,28 @@ fn command_handler(mut config_manager : ConfigManager){
                 }
             }
 
+            "pcl loop" =>{
+                match SystemController::start_system_control(&mut config_manager){
+
+                    Ok(mut sys_cntrller) =>{
+                        println!(">Controller started");
+                        //If the controller crashes
+                        if sys_cntrller.pcl_save_loop().is_err(){
+                            sys_cntrller.close();
+                        }
+
+
+
+                    }
+                    Err(e) =>{
+                        println!("{e}");
+                        println!(">Exiting system control")
+                }
+
+                }
+
+            }
+
             //Take photos with each rgbd camera
             "take pic" =>{
 
@@ -301,12 +323,7 @@ fn command_handler(mut config_manager : ConfigManager){
                             Err(e) =>{
                                 println!("Failed! - {}", e);
                             }
-                        }
-                                  
-
-                        
-
-
+                        }                                  
                     }
                     Err(e) =>{
                         println!("{e}");
