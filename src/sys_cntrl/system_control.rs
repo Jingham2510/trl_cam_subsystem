@@ -197,6 +197,7 @@ impl SystemController{
         //Create the cam_move log
         //Create the data file with the csv header
         let mut data_file = OpenOptions::new()
+            .write(true)
             .truncate(true)
             .create(true)
             .open(CAM_LOG_FP)
