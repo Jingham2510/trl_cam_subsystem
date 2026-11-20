@@ -576,8 +576,9 @@ impl SystemController{
         //Get the user filepath
         let mut inp= String::new();
         stdin().read_line(&mut inp).expect("Did not enter a correct string");
-
-        let base_fp = format!("../../out/{}", inp);
+        
+        
+        let base_fp = format!("../../out/{}", inp.strip_suffix("\n").unwrap());
 
         let mut total = 0;
 
@@ -587,15 +588,16 @@ impl SystemController{
             //Take the pointclodus asynchronously
             let pcls = self.async_fire_all()?;
 
+
             //Save each pointcloud with a unique name
             for (j, pcl) in pcls.iter().enumerate(){
-                let fp = format!("{}_{}_{}", base_fp, total, i);
+                let fp = format!("{}_{}_{}", base_fp, total, j);
                 pcl.save_to_file(&fp);
             }
 
             total += 1;
 
-            println!("{} pcls saved", total);
+            println!("{} pcl set saved", total);
         }
 
         Ok(())
