@@ -205,22 +205,33 @@ impl SystemController{
 
 
         //If valid cameras - 
+        println!(">Getting camera list...");
         let cam_list = config.cams();
         let mut connected_cams : Vec<Arc<Mutex<CamType>>> = vec![];
 
         let mut realsense_cnt = 0;
         let mut zed_cnt = 0;
 
+    
+        
+
+        println!(">Iterating over camera list...");
         for cam in cam_list{
             if cam == "Realsense"{
-                connected_cams.push(Arc::new(Mutex::new(CamType::RealsenseCam(DepthCam::connect_realsense(realsense_cnt)?))));
+                println!("Realsense cnt: {}", realsense_cnt);
+                //Always connect to 0th camera because 
+                connected_cams.push(Arc::new(Mutex::new(CamType::RealsenseCam(DepthCam::connect_realsense(0)?))));
                 realsense_cnt += 1;
+                println!(">Realsense camera connected");
             }
             if cam == "STEREOLABS"{
                 connected_cams.push(Arc::new(Mutex::new(CamType::ZedCamera(DepthCam::connect_zed(zed_cnt)?))));
                 zed_cnt += 1;
+                println!(">Zed camera connected");
             }
         }
+
+        
 
         info!("{} realsense cams detected", realsense_cnt);
         info!("{} zed cams detected", zed_cnt);
@@ -250,7 +261,7 @@ impl SystemController{
     }
 
 
-    ///Fire all of the depth cameras the system controls and saves the pointclouds
+    ///Fire all of the depth cameras the system controls
     pub fn fire_all_cams(&mut self) -> Result<Vec<PointCloud>, anyhow::Error>{
 
         info!("Cams firing");
@@ -576,8 +587,7 @@ impl SystemController{
         //Get the user filepath
         let mut inp= String::new();
         stdin().read_line(&mut inp).expect("Did not enter a correct string");
-        
-        
+
         let base_fp = format!("../../out/{}", inp.strip_suffix("\n").unwrap());
 
         let mut total = 0;
