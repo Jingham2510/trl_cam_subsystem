@@ -12,7 +12,7 @@ use anyhow::bail;
 use nalgebra::{UnitQuaternion, Quaternion, Vector3, Matrix4, Translation3, matrix};
 
 use std::cell::RefCell;
-use std::io::{Read, stdin};
+use std::io::{Read, stdin, Write};
 use std::process::exit;
 use std::net::UdpSocket;
 use std::sync::mpsc;
@@ -756,7 +756,7 @@ impl SystemController{
             let mut cam = cam.lock().unwrap();
 
             //Check that the cameras imu is on
-            if cam.imu_enabled{
+            if cam.imu_enabled(){
                 pos_vec.push(cam.get_pos()?);
             } 
         }
@@ -771,7 +771,7 @@ impl SystemController{
         //Create the data file with the csv header
         let mut data_file = OpenOptions::new()
             .append(true)
-            .open(&t_data.data_filename)
+            .open(CAM_LOG_FP)
             .unwrap();
 
         data_file.write_all(format!("{:?}\n", pos_ests).as_bytes());
