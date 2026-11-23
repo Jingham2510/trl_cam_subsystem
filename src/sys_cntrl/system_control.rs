@@ -66,40 +66,42 @@ const GLOBAL_HMAP_WIDTH : usize = (GLOBAL_AREA_WIDTH / HMAP_RES) as usize;
 const GLOBAL_HMAP_HEIGHT : usize = (GLOBAL_AREA_HEIGHT / HMAP_RES) as usize;
 
 
-
+//CURRENT FIRING ORDER 
+//BL->BR->FRONT
 
 
 //CALIB POS TO WORLD TRANSFORM -----------------
 
-///NEW TRANSFORMS
-const CALIB_POS : [f32;3] = [121.04, 2446.29, 248.80];
-const CALIB_ORI : [f32; 4] = [0.00317, -0.17772, 0.98399, 0.01286];
+///CALIBRATION POSITION - WITH NO TOOL (i.e. includes force sensor)
+const CALIB_POS : [f32;3] = [171.54, 2356.35, 608.81];
+const CALIB_ORI : [f32; 4] = [0.00929, 0.16741, -0.98583, 0.00509];
 
-//Added 5cm of height to each transform to properly place in the sandbed
 
-const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![ 0.9998314,  -0.00798137, -0.01653686,  0.22178532;
-                                                     0.01464439,  0.88990805,  0.45590481, -0.09734951;
-                                                     0.01107754, -0.45607012,  0.8898749,  -0.62943091;
-                                                     0.        ,  0.        ,  0.       ,   1.        ];
-
+const FRONT_SPOKE_TRANSFORM : Matrix4<f32> = matrix![-0.99899551557681, -0.04226224567962896, -0.014895047752140629, 0.3122061186469016;
+0.030435006218420737, -0.8839017726881305, 0.4666812259297188, -0.03251663667695311;
+-0.03288875573670366, 0.465759121036717, 0.8843001588358994, -0.5960938172876132;
+0.0, 0.0, 0.0, 1.0;];
 
 
 
 
-const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![ 0.44983659, -0.80929274,  0.37774636, -0.03133563;
-                                                     0.89303276,  0.40198995, -0.20222899,  0.32980309;
-                                                     0.01181221,  0.42830987,  0.90355472, -0.63459977;
-                                                     0.        ,  0.        ,  0.        ,  1.        ];
+
+const BACK_SPOKE_L_TRANSFORM : Matrix4<f32> = matrix![0.48159271263130415, -0.8008477335837144, 0.35596540106343183, 0.02033132736153277;
+0.8748503520584744, 0.4151969625398048, -0.2494961799324453, 0.3991844896418486;
+0.05201269694589321, 0.4315719985257937, 0.9005777531367666, -0.6066500545047026;
+0.0, 0.0, 0.0, 1.0;];
+
+
+
+const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![0.4920263818185973, 0.7670088131415131, -0.4118343358168998, 0.5509871548626446;
+-0.8704340799437051, 0.44208750975294203, -0.2165713420399797, 0.44157190844299665;
+0.015954687933500567, 0.46503345501553917, 0.8851493284464802, -0.5877192219740137;
+0.0, 0.0, 0.0, 1.0;];
 
 
 
 
-const BACK_SPOKE_R_TRANSFORM : Matrix4<f32> = matrix![ 0.50649045,  0.77714794, -0.37350837,  0.49473645;
-                                                    -0.86224487,  0.45595135, -0.22054965,  0.39169167;
-                                                    -0.00109806,  0.43376197,  0.90102683, -0.61863551;
-                                                     0.        ,  0.        ,  0.        ,  1.        ];
-
-const T_WORLD_CALIB : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM , BACK_SPOKE_L_TRANSFORM , BACK_SPOKE_R_TRANSFORM];
+const T_WORLD_CALIB : [Matrix4<f32>; 3] = [BACK_SPOKE_L_TRANSFORM , BACK_SPOKE_R_TRANSFORM, FRONT_SPOKE_TRANSFORM];
 
 
 
@@ -107,26 +109,26 @@ const T_WORLD_CALIB : [Matrix4<f32>; 3] = [FRONT_SPOKE_TRANSFORM , BACK_SPOKE_L_
 
 ///FORCE SENSOR TO CAMERA TRANSFORMS - DEFINED IN THE TCP FRAME -opencv calced
 
-const FORCE_TO_FRONT_CAM : Matrix4<f32> = matrix![-0.9420656824831528, 0.3011015127512243, 0.147817891022961, -0.0661588662273698;
-                                                -0.3353728941901005, -0.8374960703056575, -0.431422477468591, 0.31183874579145265;
-                                                -0.006105057748074003, -0.4560024246004681, 0.8899575928258532, -0.07290399838878403;
-                                                0.0, 0.0, 0.0, 1.0;];
+const FORCE_TO_FRONT_CAM : Matrix4<f32> = matrix![0.9464713852548146, -0.18468624457298505, -0.26473176605643794, -0.28688827255775634;
+0.1002264109807594, 0.9477518654295058, -0.30285486312226784, 0.20644821188555162;
+-0.30683315243915377, -0.2601103470460555, -0.9155304604019643, 0.7603868110360974;
+0.0, 0.0, 0.0, 1.0;];
 
 
-const FORCE_TO_BL_CAM: Matrix4<f32> = matrix![-0.12353354300547559, 0.8971388147126936, -0.42412428707681615, 0.31568317389970685;
-                                            -0.9923333518892358, -0.113291896393938, 0.0493909398547879, -0.008723076643095948;
-                                            -0.003739315550789185, 0.42697411320520173, 0.9042561164691356, -0.08104667759030465;
-                                            0.0, 0.0, 0.0, 1.0;];
+const FORCE_TO_BL_CAM: Matrix4<f32> = matrix![-0.2553413480909949, 0.8838008918456687, -0.39204180839277014, 0.2117304810346405;
+-0.9667589409859791, -0.23898039925061482, 0.09091489865628377, -0.0365676482947881;
+-0.013339639378156284, 0.4022242562884742, 0.9154439915551602, -0.01916256485698814;
+0.0, 0.0, 0.0, 1.0;];
 
 
 
-const FORCE_TO_BR_CAM : Matrix4<f32> = matrix![-0.7093846891906819, -0.647396861303359, 0.2786586921601385, -0.1703756814912174;
-                                            0.7048130123989124, -0.6496388541232674, 0.2849701331132417, -0.23776528199520605;
-                                            -0.0034612562763123578, 0.39855572155969266, 0.9171375886512465, -0.06462090766642739;
-                                            0.0, 0.0, 0.0, 1.0;];
+const FORCE_TO_BR_CAM : Matrix4<f32> = matrix![0.6767664387744544, 0.6539795790193381, 0.3380797207379216, -0.19565337878514497;
+-0.7355242093078449, 0.620275285946706, 0.2725118477530901, -0.11913406185413351;
+-0.031485311982148545, -0.4330926920064818, 0.9007993090916345, -0.11452860657587213;
+0.0, 0.0, 0.0, 1.0;];
 
 
-const T_LC_CAM :[Matrix4<f32>; 3] = [FORCE_TO_FRONT_CAM, FORCE_TO_BL_CAM, FORCE_TO_BR_CAM];
+const T_LC_CAM :[Matrix4<f32>; 3] = [FORCE_TO_BL_CAM, FORCE_TO_BR_CAM, FORCE_TO_FRONT_CAM];
 
 
 ///TCP POINT TO FORCE SENSOR POINT TRANSFORM - DEFINED IN THE CURRENT TCP FRAME
@@ -159,7 +161,7 @@ const BR_FINE_TUNE : Matrix4<f32> = matrix![1.0, 0.0, 0.0, 0.0;
                                                0.0, 0.0, 1.0, 0.0;
                                                0.0, 0.0, 0.0, 1.0];
 
-const FINE_TUNES:[Matrix4<f32>; 3] = [FRONT_FINE_TUNE, BL_FINE_TUNE, BR_FINE_TUNE];
+const FINE_TUNES:[Matrix4<f32>; 3] = [BL_FINE_TUNE, BR_FINE_TUNE, FRONT_FINE_TUNE];
 
 
 
@@ -168,7 +170,7 @@ const FRONT_SPOKE_CROP : [f32;6] = [-0.5, 0.5, -0.5, 0.5, -999.0, 999.0];
 const BACK_SPOKE_L_CROP : [f32;6] = [-0.5, 0.5, -0.5, 0.5, -999.0, 999.0];
 const BACK_SPOKE_R_CROP : [f32;6] = [-0.5, 0.5, -0.5, 0.5, -999.0, 999.0];
 
-const CROP_LIST : [[f32;6];3] = [FRONT_SPOKE_CROP, BACK_SPOKE_L_CROP, BACK_SPOKE_R_CROP];
+const CROP_LIST : [[f32;6];3] = [BACK_SPOKE_L_CROP, BACK_SPOKE_R_CROP, FRONT_SPOKE_CROP];
 
 
 impl SystemController{
@@ -364,7 +366,7 @@ impl SystemController{
 
             let tcp_at_calib = Translation3::from(calib_pos_m).to_homogeneous() * q_calib.to_homogeneous();
         
-            let cam_at_calib =   tcp_at_calib *  T_STCP_LC   *  T_LC_CAM[i];
+            let cam_at_calib =   tcp_at_calib *  T_NOTOOL_LC   *  T_LC_CAM[i];
 
 
             
@@ -378,7 +380,7 @@ impl SystemController{
 
 
             let tcp_at_curr = Translation3::from(curr_pos_m).to_homogeneous() * q_curr.to_homogeneous();
-            let cam_at_curr = tcp_at_curr *  T_STCP_LC  *  T_LC_CAM[i];
+            let cam_at_curr = tcp_at_curr *  T_NOTOOL_LC  *  T_LC_CAM[i];
 
             //Calculate the transformation from the calibration frame to the current camera frame
             let T_calib_curr= cam_at_calib.try_inverse().unwrap() * cam_at_curr;
